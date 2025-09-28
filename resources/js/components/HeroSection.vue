@@ -21,22 +21,39 @@
         </div>
       </div>
 
-      <!-- Права колонка (картка) -->
+      <!-- Права колонка -->
       <div class="relative">
-        <!-- фонові «баббли» фіксованого розміру — не впливають на flow -->
         <div class="absolute -left-10 top-10 hidden h-24 w-24 rounded-full bg-muted/60 blur-3xl md:block"></div>
         <div class="absolute -right-8 bottom-4 hidden h-20 w-20 rounded-full bg-accent/30 blur-2xl md:block"></div>
 
         <div ref="card" class="relative rounded-3xl bg-white p-6 shadow-xl shadow-muted/40">
           <div class="space-y-4">
+            <!-- Картинка (опційно) з фіксованим aspect-ratio -->
+            <div v-if="hasImage" class="overflow-hidden rounded-2xl">
+              <div class="relative w-full" :style="aspectBoxStyle">
+                <img
+                  class="absolute inset-0 h-full w-full object-cover"
+                  :src="imageUrl"
+                  :alt="imageAltComputed"
+                  :width="imageWidth || undefined"
+                  :height="imageHeight || undefined"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            </div>
+
             <h2 class="text-lg font-semibold text-secondary">{{ listTitle }}</h2>
-            <ul ref="bulletsEl" class="space-y-3 text-sm text-muted">
-              <li v-for="(item, i) in bullets" :key="i" class="flex items-start gap-3">
+
+            <!-- Якщо є пункти — показуємо їх, інакше короткий хінт -->
+            <ul v-if="visibleBullets.length" ref="bulletsEl" class="space-y-3 text-sm text-muted">
+              <li v-for="(item, i) in visibleBullets" :key="i" class="flex items-start gap-3">
                 <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary"></span>
                 <span>{{ item }}</span>
               </li>
               <slot name="extra"></slot>
             </ul>
+            <p v-else class="text-sm text-muted/60">(Налаштуйте «Список переваг» у адмінці)</p>
           </div>
         </div>
       </div>
@@ -45,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import gsap from 'gsap'
 
 const props = defineProps({
@@ -54,16 +71,15 @@ const props = defineProps({
   title:      { type: String, default: 'Допоможу заговорити англійською впевнено вже за 3 місяці' },
   subtitle:   { type: String, default: 'Я — репетитор з 8-річним досвідом підготовки до IELTS, розмовної практики та бізнес-англійської. Працюю з підлітками та дорослими, комбіную сучасні матеріали та живе спілкування.' },
   listTitle:  { type: String, default: 'Що ви отримаєте' },
-  bullets:    {
-    type: Array,
-    default: () => ([
-      'Онлайн та офлайн заняття у зручному графіку',
-      'Персональний план під ваш рівень та цілі',
-      'Цифрові матеріали, Д/З та регулярний фідбек',
-    ])
-  },
+  bullets:    { type: Array,  default: () => [] },
+
   primary:   { type: Object, default: () => ({ text: 'Запис на пробний урок', href: '#contact' }) },
   secondary: { type: Object, default: () => ({ text: 'Дивитися програми', href: '#services' }) },
+
+  imageUrl:   { type: String, default: '' },
+  imageAlt:   { type: String, default: '' },
+  imageWidth: { type: [Number, String], default: null },
+  imageHeight:{ type: [Number, String], default: null },
 })
 
 const root = ref(null)
@@ -71,42 +87,44 @@ const leftCol = ref(null)
 const card = ref(null)
 const bulletsEl = ref(null)
 
-let ctx
+const hasImage = computed(() => !!props.imageUrl)
+const visibleBullets = computed(() =>
+  Array.isArray(props.bullets)
+    ? props.bullets.map(v => (typeof v === 'string' ? v.trim() : '')).filter(Boolean)
+    : []
+)
 
+const aspectBoxStyle = computed(() => {
+  const w = Number(props.imageWidth)
+  const h = Number(props.imageHeight)
+  return (w > 0 && h > 0)
+    ? { paddingBottom: `${(h / w) * 100}%` }
+    : { paddingBottom: '56.25%' } // 16:9 за замовченням
+})
+
+const imageAltComputed = computed(() => props.imageAlt || props.title)
+
+let ctx
 onMounted(() => {
-  // Якщо користувач просить менше руху — показати все одразу без анімацій
   const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   if (prefersReduce) return
 
   ctx = gsap.context(() => {
-    // Початкові стани (тільки opacity/transform -> без CLS)  :contentReference[oaicite:1]{index=1}
-    gsap.set([leftCol.value, card.value], { autoAlpha: 0, y: 12 }) // 12px — ледь помітно
+    gsap.set([leftCol.value, card.value], { autoAlpha: 0, y: 12 })
 
-    // Вхідний таймлайн
     const tl = gsap.timeline({ defaults: { duration: 0.5, ease: 'power2.out' } })
     tl.to(leftCol.value, { autoAlpha: 1, y: 0 })
       .to(card.value,    { autoAlpha: 1, y: 0 }, '-=0.2')
 
-    // Легка «поява» пунктів списку (без зсуву макета)  :contentReference[oaicite:2]{index=2}
     if (bulletsEl.value) {
-      tl.from(
-        bulletsEl.value.querySelectorAll('li'),
-        { opacity: 0, y: 8, stagger: 0.06, duration: 0.35 },
-        '-=0.2'
-      )
+      tl.from(bulletsEl.value.querySelectorAll('li'), { opacity: 0, y: 8, stagger: 0.06, duration: 0.35 }, '-=0.2')
     }
   }, root)
 })
-
-onBeforeUnmount(() => {
-  if (ctx) ctx.revert()
-})
+onBeforeUnmount(() => { if (ctx) ctx.revert() })
 </script>
 
 <style scoped>
-/* Підказка браузеру: елементи тільки фейдяться/зсуваються композитом */
 :where([ref="leftCol"], [ref="card"], li) { will-change: transform, opacity; }
-
-/* Запобігаємо небажаним подіям на декоративних «бабблах» */
 .relative > .absolute { pointer-events: none; }
 </style>

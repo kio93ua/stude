@@ -4,27 +4,46 @@
 
 @section('content')
 
-  {{-- === HERO (Vue) === --}}
-  @php
+{{-- === HERO (Vue) === --}}
+@php
+    /** @var \App\Settings\HomePageSettings $s */
+    $s = app(\App\Settings\HomePageSettings::class);
+
+    // URL картинки: http(s) або файл у "public"
+    $heroImageUrl = null;
+    if (!empty($s->hero_image_path)) {
+        $heroImageUrl = \Illuminate\Support\Str::startsWith($s->hero_image_path, ['http://','https://'])
+            ? $s->hero_image_path
+            : \Illuminate\Support\Facades\Storage::disk('public')->url($s->hero_image_path);
+    }
+
+    // Нормалізуємо bullets ДО масиву рядків
+    $rawBullets = $s->hero_bullets ?? [];
+    $bullets = array_values(array_filter(
+        is_array($rawBullets)
+            ? array_map(fn ($v) => is_string($v) ? trim($v) : (is_array($v) && isset($v[0]) ? trim((string)$v[0]) : ''), $rawBullets)
+            : (is_string($rawBullets) ? preg_split('/\s*,\s*/', $rawBullets, -1, PREG_SPLIT_NO_EMPTY) : []),
+        fn ($v) => $v !== ''
+    ));
+
     $heroProps = [
-      'headingTag' => 'h1',
-      'badge'      => 'Індивідуальні заняття з англійської',
-      'title'      => 'Допоможу заговорити англійською впевнено вже за 3 місяці',
-      'subtitle'   => 'Я — репетитор з 8-річним досвідом підготовки до IELTS, розмовної практики та бізнес-англійської. Працюю з підлітками та дорослими, комбіную сучасні матеріали та живе спілкування.',
-      'listTitle'  => 'Що ви отримаєте',
-      'bullets'    => [
-        'Онлайн та офлайн заняття у зручному графіку',
-        'Персональний план під ваш рівень та цілі',
-        'Цифрові матеріали, Д/З та регулярний фідбек',
-      ],
-      'primary'    => ['text' => 'Запис на пробний урок', 'href' => '#contact'],
-      'secondary'  => ['text' => 'Дивитися програми', 'href' => '#services'],
+        'headingTag' => 'h1',
+        'badge'      => $s->hero_badge,
+        'title'      => $s->hero_title,
+        'subtitle'   => $s->hero_subtitle,
+        'listTitle'  => 'Що ви отримаєте',
+        // 👇 ВАЖЛИВО: Подаємо вже-нормалізований масив, а не $s->hero_bullets
+        'bullets'    => $bullets,
+        'primary'    => ['text' => $s->hero_primary_text,   'href' => $s->hero_primary_href],
+        'secondary'  => ['text' => $s->hero_secondary_text, 'href' => $s->hero_secondary_href],
+        'imageUrl'   => $heroImageUrl,
     ];
-  @endphp
-  <div
-    data-vue="HeroSection"
-    data-props='@json($heroProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
-  </div>
+@endphp
+
+<div
+  data-vue="HeroSection"
+  data-props='@json($heroProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+</div>
 
   {{-- === KPI (Blade) === --}}
   <section class="bg-white py-12" aria-label="Ключові показники">
