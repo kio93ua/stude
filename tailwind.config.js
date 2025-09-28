@@ -6,33 +6,32 @@ import aspectRatio from '@tailwindcss/aspect-ratio'
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-    './storage/framework/views/*.php',
     './resources/views/**/*.blade.php',
     './resources/js/**/*.{js,vue}',
+    './app/View/**/*.php',
+    './routes/**/*.php',
+    './storage/framework/views/*.php',
   ],
   theme: {
     extend: {
-      // КАСТОМНІ КОЛЬОРИ з твоєї палітри
       colors: {
         brand: {
-          teal: '#0E6973', // глибокий бірюзовий
-          aqua: '#118C8C', // насичена бірюза
-          mint: '#BAD9CE', // м’яка "вода"
-          sun: '#F2BB16', // лимон/сонце
-          ochre: '#BF820F', // теплий охристий
+          teal: '#0E6973',
+          aqua: '#118C8C',
+          mint: '#BAD9CE',
+          sun: '#F2BB16',
+          ochre: '#BF820F',
         },
-        // зручні псевдоніми-ролі (можеш використовувати bg-primary, text-accent тощо)
         primary: '#118C8C',
         secondary: '#0E6973',
         accent: '#F2BB16',
         muted: '#BAD9CE',
         warn: '#BF820F',
       },
-
       fontFamily: {
         sans: ['Instrument Sans', ...defaultTheme.fontFamily.sans],
       },
+      container: { center: true, padding: '1rem' },
     },
   },
   plugins: [forms, typography, aspectRatio],

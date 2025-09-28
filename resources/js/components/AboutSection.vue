@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
+<style>
 /* підказуємо браузеру, що тут часто змінюються transform/opacity */
 [data-stagger],[data-item] { will-change: transform, opacity; }
 </style>

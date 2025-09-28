@@ -23,12 +23,12 @@
 
       <!-- Права колонка -->
       <div class="relative">
-        <div class="absolute -left-10 top-10 hidden h-24 w-24 rounded-full bg-muted/60 blur-3xl md:block"></div>
-        <div class="absolute -right-8 bottom-4 hidden h-20 w-20 rounded-full bg-accent/30 blur-2xl md:block"></div>
+        <div aria-hidden="true" class="absolute -left-10 top-10 hidden h-24 w-24 rounded-full bg-muted/60 blur-3xl md:block"></div>
+        <div aria-hidden="true" class="absolute -right-8 bottom-4 hidden h-20 w-20 rounded-full bg-accent/30 blur-2xl md:block"></div>
 
         <div ref="card" class="relative rounded-3xl bg-white p-6 shadow-xl shadow-muted/40">
           <div class="space-y-4">
-            <!-- Картинка (опційно) з фіксованим aspect-ratio -->
+            <!-- Картинка з контрольованим аспектом -->
             <div v-if="hasImage" class="overflow-hidden rounded-2xl">
               <div class="relative w-full" :style="aspectBoxStyle">
                 <img
@@ -45,7 +45,6 @@
 
             <h2 class="text-lg font-semibold text-secondary">{{ listTitle }}</h2>
 
-            <!-- Якщо є пункти — показуємо їх, інакше короткий хінт -->
             <ul v-if="visibleBullets.length" ref="bulletsEl" class="space-y-3 text-sm text-muted">
               <li v-for="(item, i) in visibleBullets" :key="i" class="flex items-start gap-3">
                 <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary"></span>
@@ -62,8 +61,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed, nextTick } from 'vue'
 import gsap from 'gsap'
+
+defineOptions({ name: 'HeroSection' })
 
 const props = defineProps({
   headingTag: { type: String, default: 'h1' },
@@ -72,10 +73,8 @@ const props = defineProps({
   subtitle:   { type: String, default: 'Я — репетитор з 8-річним досвідом підготовки до IELTS, розмовної практики та бізнес-англійської. Працюю з підлітками та дорослими, комбіную сучасні матеріали та живе спілкування.' },
   listTitle:  { type: String, default: 'Що ви отримаєте' },
   bullets:    { type: Array,  default: () => [] },
-
-  primary:   { type: Object, default: () => ({ text: 'Запис на пробний урок', href: '#contact' }) },
-  secondary: { type: Object, default: () => ({ text: 'Дивитися програми', href: '#services' }) },
-
+  primary:    { type: Object, default: () => ({ text: 'Запис на пробний урок', href: '#contact' }) },
+  secondary:  { type: Object, default: () => ({ text: 'Дивитися програми', href: '#services' }) },
   imageUrl:   { type: String, default: '' },
   imageAlt:   { type: String, default: '' },
   imageWidth: { type: [Number, String], default: null },
@@ -99,32 +98,51 @@ const aspectBoxStyle = computed(() => {
   const h = Number(props.imageHeight)
   return (w > 0 && h > 0)
     ? { paddingBottom: `${(h / w) * 100}%` }
-    : { paddingBottom: '56.25%' } // 16:9 за замовченням
+    : { paddingBottom: '56.25%' } // 16:9
 })
 
 const imageAltComputed = computed(() => props.imageAlt || props.title)
 
-let ctx
-onMounted(() => {
-  const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (prefersReduce) return
+let tl // єдиний локальний таймлайн
 
-  ctx = gsap.context(() => {
-    gsap.set([leftCol.value, card.value], { autoAlpha: 0, y: 12 })
+onMounted(async () => {
+  if (typeof window === 'undefined') return
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
 
-    const tl = gsap.timeline({ defaults: { duration: 0.5, ease: 'power2.out' } })
-    tl.to(leftCol.value, { autoAlpha: 1, y: 0 })
-      .to(card.value,    { autoAlpha: 1, y: 0 }, '-=0.2')
+  // дочекайся, поки DOM реально змонтовано
+  await nextTick()
 
-    if (bulletsEl.value) {
-      tl.from(bulletsEl.value.querySelectorAll('li'), { opacity: 0, y: 8, stagger: 0.06, duration: 0.35 }, '-=0.2')
-    }
-  }, root)
+  const L = leftCol.value
+  const C = card.value
+  const B = bulletsEl.value
+
+  // якщо немає вузлів — не запускаємо анімацію (уникаємо "Invalid scope")
+  if (!L && !C) return
+
+  if (L) gsap.set(L, { autoAlpha: 0, y: 12 })
+  if (C) gsap.set(C, { autoAlpha: 0, y: 12 })
+
+  tl = gsap.timeline({ defaults: { duration: 0.5, ease: 'power2.out' } })
+  if (L) tl.to(L, { autoAlpha: 1, y: 0 })
+  if (C) tl.to(C, { autoAlpha: 1, y: 0 }, '-=0.2')
+
+  if (B) {
+    const items = B.querySelectorAll('li')
+    if (items?.length) tl.from(items, { opacity: 0, y: 8, stagger: 0.06, duration: 0.35 }, '-=0.2')
+  }
 })
-onBeforeUnmount(() => { if (ctx) ctx.revert() })
+
+onBeforeUnmount(() => {
+  try { tl && tl.kill() } catch {}
+  tl = null
+  // на всяк випадок прибиваємо всі твіни по елементах
+  const nodes = [leftCol.value, card.value]
+  nodes.forEach(n => n && gsap.killTweensOf(n))
+})
 </script>
 
-<style scoped>
-:where([ref="leftCol"], [ref="card"], li) { will-change: transform, opacity; }
+<style>
+/* без scoped — жодних scopeId */
+.reveal-left, .reveal-card, li { will-change: transform, opacity; }
 .relative > .absolute { pointer-events: none; }
 </style>
