@@ -37,12 +37,25 @@
         'primary'    => ['text' => $s->hero_primary_text,   'href' => $s->hero_primary_href],
         'secondary'  => ['text' => $s->hero_secondary_text, 'href' => $s->hero_secondary_href],
         'imageUrl'   => $heroImageUrl,
+         'topIcon1xUrl'    => asset('images/hero/top-icon@1x.webp'),
+  'topIcon2xUrl'    => asset('images/hero/top-icon@2x.webp'),
+  // BOTTOM icon (1x/2x)
+  'bottomIcon1xUrl' => asset('images/hero/bottom-icon@1x.webp'),
+  'bottomIcon2xUrl' => asset('images/hero/bottom-icon@2x.webp'),
     ];
 @endphp
 
+{{-- бажано прелоадити LCP-фото --}}
+@if($heroImageUrl)
+  <link rel="preload" as="image" href="{{ $heroImageUrl }}" imagesizes="(min-width:768px) 560px, 100vw">
+@endif
+
 <div
   data-vue="HeroSection"
-  data-props='@json($heroProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+  data-props='@json($heroProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'
+>
+  {{-- ⬇️ серверний skeleton ПРЯМО всередині острова --}}
+  @include('partials.hero-skeleton')
 </div>
 
   {{-- === KPI (Blade) === --}}
@@ -95,7 +108,72 @@
     data-vue="ProgramsSection"
     data-props='@json($programsProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
   </div>
+{{-- === VALUES (Vue) === --}}
+@php
+  $valuesProps = [
+    'heading' => 'Наші цінності',
+    'subheading' => 'Що відрізняє наш підхід до навчання',
+    'sections' => [
+      [
+        'title' => 'Індивідуальний шлях',
+        'text'  => 'Програма під ваш рівень та цілі. Плавно, структуровано, з вимірюваними результатами.',
+        'tone'  => 'light',
+        'accent'=> true,
+        // можна передати SVG або URL (необов’язково)
+        'icon'  => null,
+      ],
+      [
+        'title' => 'Дружнє середовище',
+        'text'  => 'Комфортні заняття й підтримка — легше говорити та не боятися помилок.',
+        'tone'  => 'dark',
+        'accent'=> false,
+        'icon'  => null,
+      ],
+      [
+        'title' => 'Внутрішня мотивація',
+        'text'  => 'Маленькі кроки щотижня, трекінг прогресу та заохочення.',
+        'tone'  => 'soft',
+        'accent'=> false,
+        'icon'  => null,
+      ],
+      [
+        'title' => 'Ігровий формат',
+        'text'  => 'Інтерактиви, рольові ситуації й сценарії з реального життя.',
+        'tone'  => 'brand',
+        'accent'=> true,
+        'icon'  => null,
+      ],
+      [
+        'title' => 'Мова як хобі',
+        'text'  => 'Вбудовуємо англійську у ваш день: міні-звички, контент, челенджі.',
+        'tone'  => 'pastel',
+        'accent'=> false,
+        'icon'  => null,
+      ],
+    ],
+  ];
+@endphp
 
+<div
+  id="values"
+  data-vue="ValuesSection"
+  data-props='@json($valuesProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+</div>
+@php
+  $featureProps = [
+    'heading'       => 'Розмовні клуби —',
+    'headingAccent' => 'більше практики, більше впевненості!',
+    'subheading'    => 'Наші розмовні клуби — це чудова можливість покращити свою англійську чи німецьку, спілкуючись у невимушеній атмосфері.',
+    'leftCta'       => ['text' => 'Для наших студентів',       'href' => '#contact'],
+    'rightCta'      => ['text' => 'Для тих, хто вивчає інше',  'href' => '#contact'],
+    // залишаємо пустими — з’являться плейсхолдери
+    'leftImageUrl'  => $leftClubImg ?? '',
+    'rightImageUrl' => $rightClubImg ?? '',
+  ];
+@endphp
+
+<div data-vue="FeatureClubsSection"
+     data-props='@json($featureProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'></div>
   {{-- === ABOUT (Vue) === --}}
   {{-- Використовує дефолтні пропси компонента. За потреби — передай свій data-props як вище --}}
   <div id="about" data-vue="AboutSection"></div>

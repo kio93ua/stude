@@ -1,59 +1,66 @@
 <template>
-  <section
-    ref="root"
-    id="hero"
-    class="overflow-hidden bg-gradient-to-br from-brand-mint via-white to-brand-aqua/10"
-  >
+  <section ref="root" id="hero" class="overflow-hidden bg-gradient-to-br from-brand-mint via-white to-brand-aqua/10">
     <div class="mx-auto grid max-w-6xl gap-10 px-6 pb-16 pt-20 md:grid-cols-2 md:items-center">
-      <!-- Ліва колонка -->
       <div ref="leftCol" class="space-y-6">
-        <span v-if="badge" class="badge-muted">{{ badge }}</span>
-        <component :is="headingTag" class="heading-1">{{ title }}</component>
-        <p class="text-lg text-muted">{{ subtitle }}</p>
+        <span v-if="badge" ref="badgeEl" class="badge-muted font-display">{{ badge }}</span>
+        <component ref="titleEl" :is="headingTag" class="heading-1 font-display tracking-tight">{{ title }}</component>
+        <p ref="subtitleEl" class="text-lg text-muted font-sans">{{ subtitle }}</p>
 
-        <div class="flex flex-col gap-3 sm:flex-row">
-          <a v-if="primary?.href && primary?.text" :href="primary.href" class="btn-primary">
-            {{ primary.text }}
-          </a>
-          <a v-if="secondary?.href && secondary?.text" :href="secondary.href" class="btn-outline">
-            {{ secondary.text }}
-          </a>
+        <div ref="ctaEl" class="flex flex-col gap-3 sm:flex-row">
+          <a v-if="primary?.href && primary?.text" :href="primary.href" class="btn-primary font-display">{{ primary.text }}</a>
+          <a v-if="secondary?.href && secondary?.text" :href="secondary.href" class="btn-outline font-display">{{ secondary.text }}</a>
         </div>
       </div>
 
-      <!-- Права колонка -->
       <div class="relative">
         <div aria-hidden="true" class="absolute -left-10 top-10 hidden h-24 w-24 rounded-full bg-muted/60 blur-3xl md:block"></div>
         <div aria-hidden="true" class="absolute -right-8 bottom-4 hidden h-20 w-20 rounded-full bg-accent/30 blur-2xl md:block"></div>
 
+        <div ref="iconTop" class="pointer-events-none absolute -top-12 -left-14 md:-top-14 md:-left-16 z-10" :style="topIconStyle">
+          <picture v-if="top1x">
+            <source type="image/webp" :srcset="`${top1x} 1x, ${top2x} 2x`" />
+            <img :src="top1x" :alt="topIconAlt" class="block drop-shadow-md will-change-transform"
+                 :width="topIconW" :height="topIconH" loading="lazy" decoding="async" />
+          </picture>
+          <slot name="icon-top" />
+        </div>
+
         <div ref="card" class="relative rounded-3xl bg-white p-6 shadow-xl shadow-muted/40">
           <div class="space-y-4">
-            <!-- Картинка з контрольованим аспектом -->
             <div v-if="hasImage" class="overflow-hidden rounded-2xl">
               <div class="relative w-full" :style="aspectBoxStyle">
                 <img
-                  class="absolute inset-0 h-full w-full object-cover"
+                  class="absolute inset-0 h-full w-full object-cover block"
+                  :style="{ objectPosition: imageObjectPosition }"
                   :src="imageUrl"
                   :alt="imageAltComputed"
                   :width="imageWidth || undefined"
                   :height="imageHeight || undefined"
-                  loading="lazy"
-                  decoding="async"
+                  loading="eager" fetchpriority="high" decoding="async"
                 />
               </div>
             </div>
 
-            <h2 class="text-lg font-semibold text-secondary">{{ listTitle }}</h2>
+            <h2 class="text-lg font-semibold text-secondary font-display">{{ listTitle }}</h2>
 
-            <ul v-if="visibleBullets.length" ref="bulletsEl" class="space-y-3 text-sm text-muted">
+            <ul v-if="visibleBullets.length" ref="bulletsEl" class="space-y-3 text-sm text-muted font-sans">
               <li v-for="(item, i) in visibleBullets" :key="i" class="flex items-start gap-3">
                 <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary"></span>
                 <span>{{ item }}</span>
               </li>
               <slot name="extra"></slot>
             </ul>
-            <p v-else class="text-sm text-muted/60">(Налаштуйте «Список переваг» у адмінці)</p>
+            <p v-else class="text-sm text-muted/60 font-sans">(Налаштуйте «Список переваг» у адмінці)</p>
           </div>
+        </div>
+
+        <div ref="iconBottom" class="pointer-events-none absolute -bottom-14 -right-14 md:-bottom-16 md:-right-20 z-10" :style="bottomIconStyle">
+          <picture v-if="bottom1x">
+            <source type="image/webp" :srcset="`${bottom1x} 1x, ${bottom2x} 2x`" />
+            <img :src="bottom1x" :alt="bottomIconAlt" class="block drop-shadow-md will-change-transform"
+                 :width="bottomIconW" :height="bottomIconH" loading="lazy" decoding="async" />
+          </picture>
+          <slot name="icon-bottom" />
         </div>
       </div>
     </div>
@@ -79,70 +86,106 @@ const props = defineProps({
   imageAlt:   { type: String, default: '' },
   imageWidth: { type: [Number, String], default: null },
   imageHeight:{ type: [Number, String], default: null },
+  imageAspect:     { type: String, default: '4:3' },
+  imageObjectPos:  { type: String, default: '50% 45%' },
+  topIconUrl:     { type: String, default: '' },
+  topIcon1xUrl:   { type: String, default: '' },
+  topIcon2xUrl:   { type: String, default: '' },
+  topIconAlt:     { type: String, default: '' },
+  topIconW:       { type: [Number, String], default: 230 },
+  topIconH:       { type: [Number, String], default: 230 },
+  bottomIconUrl:  { type: String, default: '' },
+  bottomIcon1xUrl:{ type: String, default: '' },
+  bottomIcon2xUrl:{ type: String, default: '' },
+  bottomIconAlt:  { type: String, default: '' },
+  bottomIconW:    { type: [Number, String], default: 230 },
+  bottomIconH:    { type: [Number, String], default: 230 },
+  iconSwing: { type: Number, default: 12 },
+  iconTilt:  { type: Number, default: 2 },
+  stepDelay:       { type: Number, default: 0.5 },
+  bulletsStagger:  { type: Number, default: 1.0 },
 })
 
-const root = ref(null)
 const leftCol = ref(null)
 const card = ref(null)
 const bulletsEl = ref(null)
+const iconTop = ref(null)
+const iconBottom = ref(null)
+const badgeEl = ref(null)
+const titleEl = ref(null)
+const subtitleEl = ref(null)
+const ctaEl = ref(null)
 
 const hasImage = computed(() => !!props.imageUrl)
 const visibleBullets = computed(() =>
-  Array.isArray(props.bullets)
-    ? props.bullets.map(v => (typeof v === 'string' ? v.trim() : '')).filter(Boolean)
-    : []
+  Array.isArray(props.bullets) ? props.bullets.map(v => (typeof v === 'string' ? v.trim() : '')).filter(Boolean) : []
 )
 
 const aspectBoxStyle = computed(() => {
-  const w = Number(props.imageWidth)
-  const h = Number(props.imageHeight)
-  return (w > 0 && h > 0)
-    ? { paddingBottom: `${(h / w) * 100}%` }
-    : { paddingBottom: '56.25%' } // 16:9
+  const w = Number(props.imageWidth), h = Number(props.imageHeight)
+  if (w > 0 && h > 0) return { paddingBottom: `${(h / w) * 100}%` }
+  const [aw, ah] = (props.imageAspect || '4:3').split(':').map(n => Number(n) || 0)
+  const ratio = aw > 0 && ah > 0 ? ah / aw : 3 / 4
+  return { paddingBottom: `${ratio * 100}%` }
 })
 
+const imageObjectPosition = computed(() => props.imageObjectPos)
+const topIconStyle = computed(() => ({ width: `${props.topIconW}px`, height: `${props.topIconH}px` }))
+const bottomIconStyle = computed(() => ({ width: `${props.bottomIconW}px`, height: `${props.bottomIconH}px` }))
 const imageAltComputed = computed(() => props.imageAlt || props.title)
 
-let tl // єдиний локальний таймлайн
+const top1x = computed(() => props.topIcon1xUrl || props.topIconUrl || '')
+const top2x = computed(() => props.topIcon2xUrl || props.topIcon1xUrl || props.topIconUrl || '')
+const bottom1x = computed(() => props.bottomIcon1xUrl || props.bottomIconUrl || '')
+const bottom2x = computed(() => props.bottomIcon2xUrl || props.bottomIcon1xUrl || props.bottomIconUrl || '')
+
+let tl, topTl, bottomTl, iconsIntro
 
 onMounted(async () => {
   if (typeof window === 'undefined') return
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
-
-  // дочекайся, поки DOM реально змонтовано
   await nextTick()
 
-  const L = leftCol.value
-  const C = card.value
-  const B = bulletsEl.value
+  gsap.set([badgeEl.value, titleEl.value, subtitleEl.value, ctaEl.value], { autoAlpha: 0, y: 12 })
 
-  // якщо немає вузлів — не запускаємо анімацію (уникаємо "Invalid scope")
-  if (!L && !C) return
+  const items = bulletsEl.value?.querySelectorAll('li')
+  if (items?.length) gsap.set(items, { opacity: 0, y: 8 })
 
-  if (L) gsap.set(L, { autoAlpha: 0, y: 12 })
-  if (C) gsap.set(C, { autoAlpha: 0, y: 12 })
+  if (iconTop.value) gsap.set(iconTop.value, { autoAlpha: 0, y: -6 })
+  if (iconBottom.value) gsap.set(iconBottom.value, { autoAlpha: 0, y: 6 })
 
-  tl = gsap.timeline({ defaults: { duration: 0.5, ease: 'power2.out' } })
-  if (L) tl.to(L, { autoAlpha: 1, y: 0 })
-  if (C) tl.to(C, { autoAlpha: 1, y: 0 }, '-=0.2')
+  const d = props.stepDelay
 
-  if (B) {
-    const items = B.querySelectorAll('li')
-    if (items?.length) tl.from(items, { opacity: 0, y: 8, stagger: 0.06, duration: 0.35 }, '-=0.2')
+  tl = gsap.timeline({ defaults: { ease: 'power2.out' } })
+    .to(badgeEl.value,    { autoAlpha: 1, y: 0, duration: 0.45 }, d * 1)
+    .to(titleEl.value,    { autoAlpha: 1, y: 0, duration: 0.55 }, d * 2)
+    .to(subtitleEl.value, { autoAlpha: 1, y: 0, duration: 0.55 }, d * 3)
+    .to(ctaEl.value,      { autoAlpha: 1, y: 0, duration: 0.45 }, d * 4)
+
+  if (items?.length) {
+    tl.to(items, { opacity: 1, y: 0, duration: 0.4, stagger: props.bulletsStagger }, d * 4.2)
+  }
+
+  iconsIntro = gsap.timeline()
+  if (iconTop.value) iconsIntro.to(iconTop.value, { autoAlpha: 1, y: 0, duration: 0.35 }, 0.2)
+  if (iconBottom.value) iconsIntro.to(iconBottom.value, { autoAlpha: 1, y: 0, duration: 0.35 }, 0.25)
+
+  const swing = props.iconSwing, tilt = props.iconTilt
+  if (iconTop.value) {
+    topTl = gsap.to(iconTop.value, { x: swing, rotation: tilt, duration: 2.8, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 5 })
+  }
+  if (iconBottom.value) {
+    bottomTl = gsap.to(iconBottom.value, { x: -swing, rotation: -tilt, duration: 3.1, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 5 })
   }
 })
 
 onBeforeUnmount(() => {
-  try { tl && tl.kill() } catch {}
-  tl = null
-  // на всяк випадок прибиваємо всі твіни по елементах
-  const nodes = [leftCol.value, card.value]
-  nodes.forEach(n => n && gsap.killTweensOf(n))
+  [tl, topTl, bottomTl, iconsIntro].forEach(t => { try { t && t.kill() } catch {} })
+  ;[badgeEl.value, titleEl.value, subtitleEl.value, ctaEl.value, iconTop.value, iconBottom.value].forEach(n => n && gsap.killTweensOf(n))
 })
 </script>
 
 <style>
-/* без scoped — жодних scopeId */
 .reveal-left, .reveal-card, li { will-change: transform, opacity; }
 .relative > .absolute { pointer-events: none; }
 </style>

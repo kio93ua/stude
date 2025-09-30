@@ -6,12 +6,14 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/manrope": "^5.2.8",
+    "@vue/server-renderer": "3.4.38",
     "axios": "^1.12.2",
     "gsap": "^3.13.0",
     "pinia": "2.1.7",
     "pinia-plugin-persistedstate": "3.2.1",
     "vue": "3.4.38",
-    "@vue/server-renderer": "3.4.38",
     "vue-cal": "^4.10.2"
   },
   "devDependencies": {

@@ -7,33 +7,29 @@
   <title>{{ config('app.name', 'Study Buddy') }}</title>
   <meta name="description" content="Study Buddy — сучасна школа англійської. Засновниця: Іветта Тимканич. Розмовна практика, граматика, підготовка до іспитів.">
   <meta name="theme-color" content="#118C8C">
-
-  {{-- важливо: ЖОДНИХ Google Fonts тут. Шрифт підтягуємо з @fontsource у app.css,
-       а CLS гасимо через metric overrides (size-adjust, ascent/descent/line-gap-override). --}}
-
-  {{-- дрібний анти-флік до монтування Vue-острівців --}}
   <style>[x-cloak]{display:none!important}</style>
-
+  <link rel="preload" as="image" href="{{ asset('images/logo.png') }}" imagesizes="(min-width:1024px) 200px, 140px">
   @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 <body class="min-h-screen font-sans text-secondary bg-gradient-to-b from-brand-mint/50 via-white to-brand-mint/20">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-50 border-b border-brand-mint/50 bg-white/80 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-      <a href="{{ url('/') }}" class="group inline-flex items-center gap-2" aria-label="{{ config('app.name', 'Study Buddy') }}">
-        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-accent/90 shadow-md shadow-accent/30 ring-1 ring-accent/50">
-          <span class="block h-2 w-4 -rotate-12 rounded-full bg-warn"></span>
-        </span>
-        <span class="text-lg font-semibold tracking-tight text-secondary transition group-hover:text-primary">
-          {{ config('app.name', 'Study Buddy') }}
-        </span>
+  <header class="sticky top-0 z-50 border-b border-brand-mint/50 bg-white/85 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-2.5 md:py-3">
+      <a href="{{ url('/') }}" class="inline-flex items-center flex-shrink-0" aria-label="{{ config('app.name', 'Study Buddy') }}">
+        <img
+          src="{{ asset('images/logo.png') }}"
+          alt="{{ config('app.name', 'Study Buddy') }}"
+          width="263" height="106"
+          class="block h-10 md:h-15 w-auto object-contain select-none"
+          loading="eager" decoding="async" fetchpriority="high"
+          sizes="(min-width:1024px) 200px, 140px"
+        />
       </a>
 
       <nav class="hidden items-center gap-6 text-sm font-medium text-secondary/80 md:flex" aria-label="Головна навігація">
         <a href="#services" class="transition hover:text-primary">Послуги</a>
         <a href="#approach" class="transition hover:text-primary">Підхід</a>
-        <a href="#about" class="transition hover:text-primary">Про школу</a>
+        <a href="#about" class="transition hover:text-primary">Про школа</a>
         <a href="#testimonials" class="transition hover:text-primary">Відгуки</a>
         <a href="#contact" class="transition hover:text-primary">Запис</a>
       </nav>
@@ -55,7 +51,6 @@
     @yield('content')
   </main>
 
-  <!-- Footer -->
   <footer class="mt-16 border-t border-brand-mint/50 bg-white/90">
     <div class="mx-auto grid max-w-7xl gap-8 px-6 py-10 md:grid-cols-3">
       <div>

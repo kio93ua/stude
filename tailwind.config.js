@@ -3,7 +3,6 @@ import forms from '@tailwindcss/forms'
 import typography from '@tailwindcss/typography'
 import aspectRatio from '@tailwindcss/aspect-ratio'
 
-/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     './resources/views/**/*.blade.php',
@@ -16,20 +15,21 @@ export default {
     extend: {
       colors: {
         brand: {
-          teal: '#0E6973',
-          aqua: '#118C8C',
-          mint: '#BAD9CE',
-          sun: '#F2BB16',
+          teal: '#06757C',
+          aqua: '#108C8C',
+          mint: '#B1DED7',
+          sun: '#F1BC16',
           ochre: '#BF820F',
         },
-        primary: '#118C8C',
-        secondary: '#0E6973',
-        accent: '#F2BB16',
-        muted: '#BAD9CE',
+        primary: '#108C8C',
+        secondary: '#06757C',
+        accent: '#F1BC16',
+        muted: '#B1DED7',
         warn: '#BF820F',
       },
       fontFamily: {
-        sans: ['Instrument Sans', ...defaultTheme.fontFamily.sans],
+        sans: ['var(--font-body)'],
+        display: ['var(--font-head)'],
       },
       container: { center: true, padding: '1rem' },
     },
