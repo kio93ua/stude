@@ -174,6 +174,20 @@
 
 <div data-vue="FeatureClubsSection"
      data-props='@json($featureProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'></div>
+     {{-- === PRICING (Vue) === --}}
+@php
+  // Мінімальні пропси; якщо треба свої плани/ціни — передай їх тут:
+  $pricingProps = [
+    'currency' => '₴',
+    // 'plans' => [...], // можеш передати масив своїх планів із адмінки/настроювань
+  ];
+@endphp
+
+<div
+  id="pricing"
+  data-vue="PricingCards"
+  data-props='@json($pricingProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+</div>
   {{-- === ABOUT (Vue) === --}}
   {{-- Використовує дефолтні пропси компонента. За потреби — передай свій data-props як вище --}}
   <div id="about" data-vue="AboutSection"></div>

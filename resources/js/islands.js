@@ -8,7 +8,7 @@ import TestimonialsSection from './components/TestimonialsSection.vue'
 import CtaSection from './components/CtaSection.vue'
 import ContactSection from './components/ContactSection.vue'
 import ValuesSection from './components/ValuesSection.vue'
-
+import PricingCards from './components/PricingCards.vue'
 // ⬇️ НОВЕ
 import FeatureClubsSection from './components/FeatureClubsSection.vue'
 
@@ -21,6 +21,8 @@ const registry = {
   CtaSection: markRaw(CtaSection),
   ContactSection: markRaw(ContactSection),
   ValuesSection: markRaw(ValuesSection),
+  PricingCards: markRaw(PricingCards), 
+  
 
   // ⬇️ НОВЕ
   FeatureClubsSection: markRaw(FeatureClubsSection),

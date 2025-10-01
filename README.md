@@ -59,3 +59,8 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Dev notes
+- [AGENTS.md](./AGENTS.md) — внутрішні нотатки для розробників (сетап, гайдлайни, підводні камені).
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — правила внесків і PR-процес.
+- ADRs: див. папку [docs/adr](./docs/adr/) — архітектурні рішення (Context → Decision → Consequences).
+MD
