@@ -11,6 +11,10 @@ import ValuesSection from './components/ValuesSection.vue'
 import PricingCards from './components/PricingCards.vue'
 // ⬇️ НОВЕ
 import FeatureClubsSection from './components/FeatureClubsSection.vue'
+import AdvantagesSplit from './components/AdvantagesSplit.vue'
+import ReviewsMarquee from './components/ReviewsMarquee.vue'
+import TeacherVacancy from './components/TeacherVacancy.vue'
+
 
 const registry = {
   HeroSection: markRaw(HeroSection),
@@ -22,6 +26,9 @@ const registry = {
   ContactSection: markRaw(ContactSection),
   ValuesSection: markRaw(ValuesSection),
   PricingCards: markRaw(PricingCards), 
+  AdvantagesSplit: markRaw(AdvantagesSplit),
+  ReviewsMarquee: markRaw(ReviewsMarquee),
+  TeacherVacancy: markRaw(TeacherVacancy),
   
 
   // ⬇️ НОВЕ

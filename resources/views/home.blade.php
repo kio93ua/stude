@@ -57,6 +57,15 @@
   {{-- ⬇️ серверний skeleton ПРЯМО всередині острова --}}
   @include('partials.hero-skeleton')
 </div>
+@php
+  $vacancyProps = [
+    'mediaSrc' => '/images/teacher-apply.png',
+    'formUrl'  => 'https://docs.google.com/forms/d/e/1FAIpQLSew8oe-A0p3wS7omGT_u3h9ts04egW_Mr0SfIgYzXn8tQUekA/viewform?usp=header',
+  ];
+@endphp
+
+<div data-vue="TeacherVacancy"
+     data-props='@json($vacancyProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'></div>
 
   {{-- === KPI (Blade) === --}}
   <section class="bg-white py-12" aria-label="Ключові показники">
@@ -188,6 +197,52 @@
   data-vue="PricingCards"
   data-props='@json($pricingProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
 </div>
+@php
+  $advantagesItems = [
+    [
+      'title'   => 'Ігрові методи',
+      'desc'    => 'Інтерактиви, рольові сценарії та міні-ігри — мотивація росте, страх помилок зникає.',
+      'bullets' => ['Щотижневі челенджі', 'Сценарії з реального життя', 'Веселі практики замість нудної теорії'],
+      'image'   => ['src' => asset('images/adv/gamified.jpg'), 'alt' => 'Ігрові методи'],
+      'icons'   => [],
+    ],
+    [
+      'title'   => 'Сучасна програма вивчення',
+      'desc'    => 'Комунікативний підхід, мікрозвички та трек прогресу — чіткий результат щотижня.',
+      'bullets' => ['Модульна структура', 'Практика > теорія', 'Персональні рекомендації'],
+      'image'   => ['src' => asset('images/adv/modern.jpg'), 'alt' => 'Сучасна програма'],
+      'icons'   => [],
+    ],
+    [
+      'title'   => 'Задоволені учні',
+      'desc'    => 'Тепла дружня атмосфера й підтримка — легше говорити впевнено.',
+      'bullets' => ['Малі групи або 1-на-1', 'Зворотний зв’язок щотижня', 'Клуби розмовної практики'],
+      'image'   => ['src' => asset('images/adv/happy.jpg'), 'alt' => 'Задоволені учні'],
+      'icons'   => [],
+    ],
+  ];
+@endphp
+
+<div
+  data-vue="AdvantagesSplit"
+  data-props='@json(["items" => $advantagesItems], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+</div>
+@php
+  $reviewsProps = [
+    'reviews' => [
+      ["name"=>"Марія Коваль","avatar"=>"https://i.pravatar.cc/96?img=1","stars"=>5,"course"=>"IELTS","text"=>"..."],
+      ["name"=>"Олег С.","avatar"=>"https://i.pravatar.cc/96?img=2","stars"=>5,"course"=>"Business English","text"=>"..."],
+      ["name"=>"Ірина","avatar"=>"https://i.pravatar.cc/96?img=3","stars"=>5,"course"=>"General","text"=>"..."],
+      ["name"=>"Андрій","avatar"=>"https://i.pravatar.cc/96?img=4","stars"=>5,"course"=>"Speaking","text"=>"..."],
+    ],
+  ];
+@endphp
+
+<div
+  data-vue="ReviewsMarquee"
+  data-props='@json($reviewsProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+</div>
+
   {{-- === ABOUT (Vue) === --}}
   {{-- Використовує дефолтні пропси компонента. За потреби — передай свій data-props як вище --}}
   <div id="about" data-vue="AboutSection"></div>
