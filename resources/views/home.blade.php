@@ -59,7 +59,7 @@
 </div>
 @php
   $vacancyProps = [
-    'mediaSrc' => '/images/teacher-apply.png',
+    'mediaSrc' => '/images/teacher-apply.webp',
     'formUrl'  => 'https://docs.google.com/forms/d/e/1FAIpQLSew8oe-A0p3wS7omGT_u3h9ts04egW_Mr0SfIgYzXn8tQUekA/viewform?usp=header',
   ];
 @endphp
@@ -84,7 +84,88 @@
       </div>
     </div>
   </section>
+  {{-- === FOUNDER STORY (Vue) === --}}
+@php
+  $founder = [
+    'name'   => 'Олена Коваль',
+    'role'   => 'Засновниця школи англійської',
+    'photo'  => [
+      'src' => asset('images/founder.jpg'),
+      'alt' => 'Портрет засновниці',
+    ],
+    'socials' => [
+      'linkedin' => 'https://www.linkedin.com/',
+      'instagram'=> 'https://www.instagram.com/',
+      'site'     => 'https://example.com',
+    ],
+  ];
 
+  $storyContent = [
+    [
+      'heading' => 'Початок шляху',
+      'body'    => [
+        'Усе почалося з індивідуальних занять удома: один стіл, ноутбук та велике бажання допомогти студентам заговорити впевнено.',
+        'Поступово сформувалася методика, що поєднує комунікативний підхід та завдання з реальних ситуацій.',
+      ],
+      'milestones' => [
+        ['year' => '2015', 'text' => 'Перші 10 учнів і відгуки, що надихнули рухатися далі.'],
+        ['year' => '2016', 'text' => 'Перші групи вихідного дня: розмовні клуби та міні-проєкти.'],
+      ],
+    ],
+    [
+      'heading' => 'Розвиток і помилки',
+      'body'    => [
+        'Зростання — це експерименти. Частину форматів ми відкинули, залишивши тільки ті, що реально працюють.',
+        'Фокус — на практиці й результаті: тестові розмови, мікроцілі та підсумки після кожного модуля.',
+      ],
+      'quote' => ['text' => 'Мова — інструмент. Коли ним користуєшся щодня, він залишається гострим.', 'author' => 'Олена'],
+    ],
+    [
+      'heading' => 'Сьогодні',
+      'body'    => [
+        'Ми зібрали найкращий досвід у структуровані програми та оновлюємо матеріали щосеместру.',
+        'Мета — дати інструменти й впевненість, щоб англійська працювала у реальному житті.',
+      ],
+    ],
+  ];
+@endphp
+
+{{-- бажано прелоадити фото засновника як LCP/near-LCP, якщо поруч герой-блок --}}
+<link rel="preload" as="image" href="{{ asset('images/founder.jpg') }}" imagesizes="(min-width:768px) 560px, 100vw">
+
+<div
+  id="founder"
+  data-vue="FounderStory"
+  data-props='@json(["founder"=>$founder,"content"=>$storyContent], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+  {{-- за бажанням: server-skeleton тут --}}
+</div>
+{{-- === LESSONS (Vue) === --}}
+@php
+  // Пропси для LessonsBlock.vue
+  $lessonsProps = [
+    'intro' => [
+      'badge'    => 'Програми навчання',
+      'title'    => 'Наші уроки',
+      'subtitle' => 'Баланс розмовної практики, граматики та лексики. Кожне заняття — ще один крок до вільної англійської.',
+    ],
+    // ЗАМІНИ YouTube ID нижче на свої; можна додавати більше карток
+    'videos' => [
+      ['id' => 'dQw4w9WgXcQ', 'title' => 'Intro: як ми вчимося', 'description' => 'Короткий огляд підходу та структури уроків.'],
+      ['id' => 'ysz5S6PUM-U', 'title' => 'Розмовна практика: small talk', 'description' => 'Фрази для щоденного спілкування.'],
+      ['id' => 'ScMzIvxBSi4', 'title' => 'Граматика без болю: часи', 'description' => 'Як швидко згадати й застосувати часи.'],
+      ['id' => 'kXYiU_JCYtU', 'title' => 'Фразові дієслова', 'description' => 'Корисні конструкції для реальних ситуацій.'],
+    ],
+    // Увімкнути маркери ScrollTrigger (для дебагу): true/false
+    'debugMarkers' => false,
+  ];
+@endphp
+
+<div
+  id="lessons"
+  data-vue="LessonsBlock"
+  data-props='@json($lessonsProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+  {{-- optional: server-skeleton тут --}}
+</div>
   {{-- === PROGRAMS (Vue) === --}}
   @php
     $programsProps = [
@@ -117,72 +198,8 @@
     data-vue="ProgramsSection"
     data-props='@json($programsProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
   </div>
-{{-- === VALUES (Vue) === --}}
-@php
-  $valuesProps = [
-    'heading' => 'Наші цінності',
-    'subheading' => 'Що відрізняє наш підхід до навчання',
-    'sections' => [
-      [
-        'title' => 'Індивідуальний шлях',
-        'text'  => 'Програма під ваш рівень та цілі. Плавно, структуровано, з вимірюваними результатами.',
-        'tone'  => 'light',
-        'accent'=> true,
-        // можна передати SVG або URL (необов’язково)
-        'icon'  => null,
-      ],
-      [
-        'title' => 'Дружнє середовище',
-        'text'  => 'Комфортні заняття й підтримка — легше говорити та не боятися помилок.',
-        'tone'  => 'dark',
-        'accent'=> false,
-        'icon'  => null,
-      ],
-      [
-        'title' => 'Внутрішня мотивація',
-        'text'  => 'Маленькі кроки щотижня, трекінг прогресу та заохочення.',
-        'tone'  => 'soft',
-        'accent'=> false,
-        'icon'  => null,
-      ],
-      [
-        'title' => 'Ігровий формат',
-        'text'  => 'Інтерактиви, рольові ситуації й сценарії з реального життя.',
-        'tone'  => 'brand',
-        'accent'=> true,
-        'icon'  => null,
-      ],
-      [
-        'title' => 'Мова як хобі',
-        'text'  => 'Вбудовуємо англійську у ваш день: міні-звички, контент, челенджі.',
-        'tone'  => 'pastel',
-        'accent'=> false,
-        'icon'  => null,
-      ],
-    ],
-  ];
-@endphp
 
-<div
-  id="values"
-  data-vue="ValuesSection"
-  data-props='@json($valuesProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
-</div>
-@php
-  $featureProps = [
-    'heading'       => 'Розмовні клуби —',
-    'headingAccent' => 'більше практики, більше впевненості!',
-    'subheading'    => 'Наші розмовні клуби — це чудова можливість покращити свою англійську чи німецьку, спілкуючись у невимушеній атмосфері.',
-    'leftCta'       => ['text' => 'Для наших студентів',       'href' => '#contact'],
-    'rightCta'      => ['text' => 'Для тих, хто вивчає інше',  'href' => '#contact'],
-    // залишаємо пустими — з’являться плейсхолдери
-    'leftImageUrl'  => $leftClubImg ?? '',
-    'rightImageUrl' => $rightClubImg ?? '',
-  ];
-@endphp
 
-<div data-vue="FeatureClubsSection"
-     data-props='@json($featureProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'></div>
      {{-- === PRICING (Vue) === --}}
 @php
   // Мінімальні пропси; якщо треба свої плани/ціни — передай їх тут:

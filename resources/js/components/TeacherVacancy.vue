@@ -141,7 +141,7 @@ const props = defineProps<{
   formUrl?: string    // лінк на Google Form
 }>()
 
-const mediaUrl = computed(() => props.mediaSrc || '/images/teacher-apply.png')
+const mediaUrl = computed(() => props.mediaSrc || '/images/teacher-apply.webp')
 const formUrl  = computed(() =>
   props.formUrl ||
   'https://docs.google.com/forms/d/e/1FAIpQLSew8oe-A0p3wS7omGT_u3h9ts04egW_Mr0SfIgYzXn8tQUekA/viewform?usp=header'

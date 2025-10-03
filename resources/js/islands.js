@@ -14,6 +14,9 @@ import FeatureClubsSection from './components/FeatureClubsSection.vue'
 import AdvantagesSplit from './components/AdvantagesSplit.vue'
 import ReviewsMarquee from './components/ReviewsMarquee.vue'
 import TeacherVacancy from './components/TeacherVacancy.vue'
+import FounderStory from './components/FounderStory.vue'
+import LessonsBlock from './components/LessonsBlock.vue' 
+
 
 
 const registry = {
@@ -29,6 +32,10 @@ const registry = {
   AdvantagesSplit: markRaw(AdvantagesSplit),
   ReviewsMarquee: markRaw(ReviewsMarquee),
   TeacherVacancy: markRaw(TeacherVacancy),
+  FounderStory: markRaw(FounderStory),
+  LessonsBlock: markRaw(LessonsBlock),
+  
+  
   
 
   // ⬇️ НОВЕ
