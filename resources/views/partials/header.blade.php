@@ -28,7 +28,9 @@
       <a href="#approach" class="transition hover:text-primary">Підхід</a>
       <a href="#about" class="transition hover:text-primary">Про школа</a>
       <a href="#testimonials" class="transition hover:text-primary">Відгуки</a>
+      <a href="{{ route('posts.index') }}" class="transition hover:text-primary {{ request()->routeIs('posts.*') ? 'text-primary font-semibold' : '' }}">Блог</a>
       <a href="#contact" class="transition hover:text-primary">Запис</a>
+      
     </nav>
 
     <div class="hidden md:flex items-center gap-3">
@@ -70,6 +72,7 @@
         <li><a href="#approach" class="block rounded-lg px-3 py-2 text-secondary/90 hover:bg-brand-mint/15 hover:text-primary">Підхід</a></li>
         <li><a href="#about" class="block rounded-lg px-3 py-2 text-secondary/90 hover:bg-brand-mint/15 hover:text-primary">Про школа</a></li>
         <li><a href="#testimonials" class="block rounded-lg px-3 py-2 text-secondary/90 hover:bg-brand-mint/15 hover:text-primary">Відгуки</a></li>
+        <li><a href="{{ route('posts.index') }}" class="block rounded-lg px-3 py-2 text-secondary/90 hover:bg-brand-mint/15 hover:text-primary {{ request()->routeIs('posts.*') ? 'bg-brand-mint/20 font-semibold text-primary' : '' }}">Блог</a></li>
         <li><a href="#contact" class="block rounded-lg px-3 py-2 text-secondary/90 hover:bg-brand-mint/15 hover:text-primary">Запис</a></li>
       </ul>
 
