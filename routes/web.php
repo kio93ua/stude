@@ -8,13 +8,16 @@ use App\Http\Controllers\Dashboard\StudentMaterialController;
 use App\Http\Controllers\Dashboard\StudentTestController;
 use App\Http\Controllers\Dashboard\TeacherDashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EnrollController;
 
 Route::view('/', 'home')->name('home');
 
 Route::get('/login', [LoginController::class, 'create'])->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
-
+Route::post('/enroll', [EnrollController::class, 'store'])
+    ->name('enroll.store')
+    ->middleware('throttle:6,1'); 
 Route::middleware('auth')->prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('/admin', [AdminDashboardController::class, 'index'])
         ->middleware('panel.role:admin')

@@ -16,6 +16,8 @@ import ReviewsMarquee from './components/ReviewsMarquee.vue'
 import TeacherVacancy from './components/TeacherVacancy.vue'
 import FounderStory from './components/FounderStory.vue'
 import LessonsBlock from './components/LessonsBlock.vue' 
+import EnrollForm from './components/EnrollForm.vue'
+
 
 
 
@@ -34,7 +36,8 @@ const registry = {
   TeacherVacancy: markRaw(TeacherVacancy),
   FounderStory: markRaw(FounderStory),
   LessonsBlock: markRaw(LessonsBlock),
-  
+  EnrollForm: markRaw(EnrollForm),  
+   
   
   
 
