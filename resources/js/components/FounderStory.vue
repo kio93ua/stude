@@ -133,7 +133,7 @@ const props = defineProps({
     default: () => ({
       name: 'Олена Коваль',
       role: 'Засновниця школи англійської',
-      photo: { src: '/images/founder.jpg', alt: 'Портрет засновниці' },
+      photo: { src: '/images/founder.png', alt: 'Портрет засновниці' },
       socials: { linkedin: '#', instagram: '#', site: '#' },
     }),
   },

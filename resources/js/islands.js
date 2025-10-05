@@ -9,6 +9,7 @@ import CtaSection from './components/CtaSection.vue'
 import ContactSection from './components/ContactSection.vue'
 import ValuesSection from './components/ValuesSection.vue'
 import PricingCards from './components/PricingCards.vue'
+import FaqSection from './components/FaqSection.vue'
 // ⬇️ НОВЕ
 import FeatureClubsSection from './components/FeatureClubsSection.vue'
 import AdvantagesSplit from './components/AdvantagesSplit.vue'
@@ -17,6 +18,7 @@ import TeacherVacancy from './components/TeacherVacancy.vue'
 import FounderStory from './components/FounderStory.vue'
 import LessonsBlock from './components/LessonsBlock.vue' 
 import EnrollForm from './components/EnrollForm.vue'
+
 
 
 
@@ -37,6 +39,7 @@ const registry = {
   FounderStory: markRaw(FounderStory),
   LessonsBlock: markRaw(LessonsBlock),
   EnrollForm: markRaw(EnrollForm),  
+  FaqSection: markRaw(FaqSection),
    
   
   
