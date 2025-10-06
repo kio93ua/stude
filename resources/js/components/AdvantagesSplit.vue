@@ -2,23 +2,18 @@
   <section
     ref="root"
     id="advantages-split"
-    class="relative overflow-hidden bg-gradient-to-br from-[#BFF3E2] via-white to-[#DDF9F2] py-16 md:py-24"
+    class="section-surface section-surface--fixedhack py-16 md:py-24"
     aria-labelledby="advantages-heading"
   >
-    <!-- м’які плями -->
-    <div aria-hidden ref="blobL"
-         class="pointer-events-none absolute -top-20 -left-24 h-80 w-80 rounded-full bg-[rgba(12,124,120,0.25)] blur-3xl will-change-transform" />
-    <div aria-hidden ref="blobR"
-         class="pointer-events-none absolute -bottom-24 -right-16 h-96 w-96 rounded-full bg-[rgba(15,166,160,0.2)] blur-3xl will-change-transform" />
+    <!-- (декоративні плями прибрано; за потреби додай їх як легкий декор із малою opacity, не як фон) -->
 
     <div class="mx-auto max-w-7xl px-6">
-      <header ref="headerRef" class="mx-auto mb-8 max-w-2xl text-center md:mb-12">
-        <p class="inline-block rounded-2xl bg-white/70 px-4 py-1 font-semibold text-slate-700 ring-1 ring-slate-200 backdrop-blur">
-          Переваги навчання
-        </p>
-        <h2 id="advantages-heading" class="mt-4 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
-          Вчися ефективно — у зручному для тебе форматі
+      <header ref="headerRef" class="mx-auto mb-8 max-w-3xl text-center md:mb-12">
+        <p v-if="headerBadge" class="badge-muted font-display inline-block mb-3">{{ headerBadge }}</p>
+        <h2 id="advantages-heading" class="heading-1 font-display tracking-tight text-secondary">
+          {{ headerTitle }}
         </h2>
+        <p v-if="headerSubtitle" class="mt-3 text-lg text-secondary/85 font-sans">{{ headerSubtitle }}</p>
       </header>
 
       <!-- Split -->
@@ -52,10 +47,10 @@
             aria-live="polite"
           >
             <header class="mb-4">
-              <h3 class="text-2xl font-bold tracking-tight text-slate-900">
+              <h3 class="heading-3 text-secondary">
                 {{ current.title }}
               </h3>
-              <p v-if="current.desc" class="mt-2 text-slate-600">
+              <p v-if="current.desc" class="mt-2 text-secondary/80">
                 {{ current.desc }}
               </p>
             </header>
@@ -63,7 +58,7 @@
             <ul v-if="current.bullets?.length" class="grid gap-2" ref="bulletsEl">
               <li v-for="(b, bi) in current.bullets" :key="`b-${active}-${bi}`" class="flex items-start gap-3">
                 <span class="mt-1 inline-block h-2 w-2 rounded-full bg-gradient-to-r from-[#0C7C78] to-[#0FA6A0]" aria-hidden="true"></span>
-                <span class="text-slate-700">{{ b }}</span>
+                <span class="text-secondary/90">{{ b }}</span>
               </li>
             </ul>
 
@@ -73,52 +68,52 @@
             </div>
 
             <div class="mt-6">
-              <a href="#contact"
+              <a :href="cta.href"
                  class="rounded-2xl bg-gradient-to-r from-[#0C7C78] to-[#0FA6A0] px-5 py-2 font-semibold text-white shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0FA6A0] focus-visible:ring-offset-2">
-                Записатися
+                {{ cta.text }}
               </a>
             </div>
           </article>
         </div>
 
-        <!-- Праворуч: Swiper з ВБУДОВАНОЮ навігацією -->
+        <!-- Праворуч: Swiper з навігацією -->
         <div class="relative h-full min-w-0">
           <Swiper
-   class="adv-swiper h-full w-full overflow-hidden rounded-2xl bg-white/80 ring-1 ring-slate-200 backdrop-blur"
-   :modules="swiperModules"
-   :slides-per-view="1"
-   :space-between="24"
-   :loop="itemsToUse.length > 1"
-   :speed="650"
-   :pagination="{ clickable: true }"
-   :navigation="true"
-  :allow-touch-move="true"
-   :observer="true"
-   :observe-parents="true"
-   effect="fade"
-   :fade-effect="{ crossFade: true }"
-   @slideChange="onSlideChange"
-   @swiper="onSwiper"
-   aria-label="Фотослайдер переваг">
+            class="adv-swiper h-full w-full overflow-hidden rounded-2xl bg-white/80 ring-1 ring-slate-200 backdrop-blur"
+            :modules="swiperModules"
+            :slides-per-view="1"
+            :space-between="24"
+            :loop="itemsToUse.length > 1"
+            :speed="650"
+            :pagination="{ clickable: true }"
+            :navigation="true"
+            :allow-touch-move="true"
+            :observer="true"
+            :observe-parents="true"
+            effect="fade"
+            :fade-effect="{ crossFade: true }"
+            @slideChange="onSlideChange"
+            @swiper="onSwiper"
+            aria-label="Фотослайдер переваг">
             <SwiperSlide v-for="(it, idx) in itemsToUse" :key="`slide-${idx}`" class="adv-slide">
-  <figure class="adv-figure">
-    <!-- Замість <img> використовуємо блок-фон — 100% заповнення без білих країв -->
-    <div
-      class="adv-media"
-      :style="{ backgroundImage: `url('${it.image?.src}')` }"
-      :aria-label="it.image?.alt || it.title"
-      role="img"
-      :ref="el => (photoMasks[idx] = el as HTMLElement)"
-    />
-    <div aria-hidden class="adv-glow" />
-  </figure>
-</SwiperSlide>
+              <figure class="adv-figure">
+                <div
+                  class="adv-media"
+                  :style="{ backgroundImage: `url('${it.image?.src}')` }"
+                  :aria-label="it.image?.alt || it.title"
+                  role="img"
+                  :ref="el => (photoMasks[idx] = el as HTMLElement)"
+                />
+                <div aria-hidden class="adv-glow" />
+              </figure>
+            </SwiperSlide>
           </Swiper>
         </div>
       </div>
     </div>
   </section>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, onBeforeUpdate } from 'vue'
@@ -136,36 +131,97 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 gsap.registerPlugin(ScrollTrigger)
 
 type Item = {
-  title: string
-  desc?: string
-  bullets?: string[]
-  image: { src: string; alt?: string }
-  icons?: string[]
+  title?: string
+  desc?: string | null
+  bullets?: string[] | null
+  image?: { src?: string; alt?: string | null } | null
+  icons?: string[] | null
 }
-const props = withDefaults(defineProps<{ items?: Item[] }>(), { items: undefined })
+
+type Cta = {
+  text?: string | null
+  href?: string | null
+}
+
+const props = withDefaults(defineProps<{
+  items?: Item[]
+  badge?: string | null
+  title?: string | null
+  subtitle?: string | null
+  cta?: Cta | null
+}>(), {
+  items: undefined,
+  badge: undefined,
+  title: undefined,
+  subtitle: undefined,
+  cta: () => ({ text: 'Записатися', href: '#contact' }),
+})
 
 /** 3 потрібні переваги (fallback) */
-const fallbackItems: Item[] = [
+const fallbackItems = [
   {
     title: 'Ігрові методи',
     desc: 'Інтерактиви, рольові сценарії та міні-ігри — мотивація росте, страх помилок зникає.',
     bullets: ['Щотижневі челенджі', 'Сценарії з реального життя', 'Веселі практики замість нудної теорії'],
     image: { src: '/images/adv/gamified.jpg', alt: 'Ігрові методи' },
+    icons: [],
   },
   {
     title: 'Сучасна програма вивчення',
     desc: 'Комунікативний підхід, мікрозвички та трек прогресу — чіткий результат щотижня.',
     bullets: ['Модульна структура', 'Практика > теорія', 'Персональні рекомендації'],
     image: { src: '/images/adv/modern.jpg', alt: 'Сучасна програма' },
+    icons: [],
   },
   {
     title: 'Задоволені учні',
     desc: 'Тепла дружня атмосфера й підтримка — легше говорити впевнено.',
     bullets: ['Малі групи або 1-на-1', 'Зворотний зв’язок щотижня', 'Клуби розмовної практики'],
     image: { src: '/images/adv/happy.jpg', alt: 'Задоволені учні' },
+    icons: [],
   },
 ]
-const itemsToUse = computed(() => (props.items?.length ? props.items : fallbackItems))
+const normalizedItems = computed(() => {
+  const source = Array.isArray(props.items) ? props.items : []
+
+  const mapped = source
+    .map((item) => {
+      const title = typeof item?.title === 'string' ? item.title.trim() : ''
+      const imageSrc = typeof item?.image?.src === 'string' ? item.image.src.trim() : ''
+      if (!title || !imageSrc) {
+        return null
+      }
+
+      const desc = typeof item?.desc === 'string' ? item.desc.trim() : ''
+
+      const bullets = Array.isArray(item?.bullets)
+        ? item.bullets
+            .map((v) => (typeof v === 'string' ? v.trim() : ''))
+            .filter((v): v is string => v !== '')
+        : []
+
+      const icons = Array.isArray(item?.icons)
+        ? item.icons
+            .map((v) => (typeof v === 'string' ? v.trim() : ''))
+            .filter((v): v is string => v !== '')
+        : []
+
+      return {
+        title,
+        desc: desc !== '' ? desc : undefined,
+        bullets,
+        image: {
+          src: imageSrc,
+          alt: typeof item?.image?.alt === 'string' && item.image.alt.trim() !== '' ? item.image.alt.trim() : title,
+        },
+        icons,
+      }
+    })
+    .filter((entry): entry is Required<ReturnType<typeof mapped[0]>> => entry !== null)
+
+  return mapped.length ? mapped : fallbackItems
+})
+const itemsToUse = normalizedItems
 
 /* Стан */
 const active = ref(0)
@@ -183,6 +239,16 @@ onBeforeUpdate(() => { photoMasks.value = [] })
 const swiperModules = [Navigation, Pagination, A11y, EffectFade]
 const current = computed(() => itemsToUse.value?.[active.value] ?? { title: '' })
 
+const headerBadge = computed(() => (typeof props.badge === 'string' ? props.badge.trim() : 'Переваги навчання'))
+const headerTitle = computed(() => (typeof props.title === 'string' && props.title.trim() !== '' ? props.title.trim() : 'Вчися ефективно — у зручному для тебе форматі'))
+const headerSubtitle = computed(() => (typeof props.subtitle === 'string' && props.subtitle.trim() !== '' ? props.subtitle.trim() : ''))
+
+const cta = computed(() => {
+  const text = typeof props.cta?.text === 'string' && props.cta.text.trim() !== '' ? props.cta.text.trim() : 'Записатися'
+  const href = typeof props.cta?.href === 'string' && props.cta.href.trim() !== '' ? props.cta.href.trim() : '#contact'
+  return { text, href }
+})
+
 /* Керування */
 function onSwiper(sw: SwiperType) {
   swiperRef.value = sw
@@ -190,7 +256,7 @@ function onSwiper(sw: SwiperType) {
   try { /* @ts-ignore */ sw.navigation?.update?.() } catch {}
 }
 function goTo(idx: number) {
-  if (!swiperRef.value) return
+  if (!swiperRef.value || itemsToUse.value.length === 0) return
   const total = itemsToUse.value.length
   const t = ((idx % total) + total) % total
   active.value = t

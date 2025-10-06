@@ -3,33 +3,31 @@
   <section
     id="lessons"
     aria-labelledby="lessons-heading"
-    class="relative bg-gradient-to-br from-[#BFF3E2] via-white to-[#DDF9F2]"
+    class="relative section-surface"
   >
-    <div class="mx-auto max-w-7xl px-6 py-10 sm:py-14">
+    <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24">
       <!-- Хедер -->
       <header class="mx-auto max-w-3xl text-center space-y-4">
-        <span
-          class="inline-flex items-center rounded-full border border-teal-200/60 bg-white/80 px-3 py-1 text-xs font-semibold text-teal-700 shadow-sm"
-        >
-          {{ introLocal.badge }}
-        </span>
-        <h2 id="lessons-heading" class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <p class="badge-muted font-display inline-block">{{ introLocal.badge }}</p>
+
+        <h2 id="lessons-heading" class="heading-1 font-display tracking-tight text-secondary">
           {{ introLocal.title }}
         </h2>
-        <p class="text-slate-600 text-base sm:text-lg">
+
+        <p class="text-secondary/85 text-base sm:text-lg font-sans">
           {{ introLocal.subtitle }}
         </p>
       </header>
 
       <!-- Сітка: текст ліворуч, 1 відео праворуч -->
-      <div class="mt-8 grid gap-8 md:mt-12 md:grid-cols-[1.1fr_1.7fr]">
-        <!-- Ліва колонка (без відео) -->
+      <div class="mt-12 grid gap-8 md:grid-cols-[1.1fr_1.7fr]">
+        <!-- Ліва колонка -->
         <div class="space-y-6">
           <section class="rounded-2xl bg-white/90 ring-1 ring-slate-200 p-5 sm:p-6 shadow-sm">
             <h3 class="text-lg sm:text-xl font-semibold text-slate-900">Як проходять заняття</h3>
             <p class="mt-3 text-slate-700 text-base sm:text-lg">
-              На уроках поєднуємо розмовну практику, граматику та роботу з лексикою. Кожне заняття має чітку мету та
-              відчутний прогрес.
+              На уроках поєднуємо розмовну практику, граматику та роботу з лексикою.
+              Кожне заняття має чітку мету та відчутний прогрес.
             </p>
           </section>
 
@@ -52,7 +50,7 @@
           </section>
         </div>
 
-        <!-- Права колонка: тільки 1 велика відео-картка -->
+        <!-- Права колонка: велика відео-картка -->
         <div class="w-full mx-auto max-w-3xl sm:max-w-[900px]">
           <article
             v-if="rightVideo"
@@ -63,13 +61,13 @@
                 {{ rightVideo.title }}
               </h3>
 
-              <!-- Стабільна рамка 16:9; мінімум 400px висоти (за вимогою) -->
+              <!-- 16:9 / мін. висота 400px -->
               <div
                 class="w-full aspect-video min-h-[400px] rounded-xl overflow-hidden bg-black"
                 :data-yt-id="rightVideo.id"
                 :ref="setObserveTarget"
               >
-                <!-- Постер до кліку/входу у в’юпорт -->
+                <!-- Постер до кліку -->
                 <button
                   v-if="!played[rightVideo.id]"
                   class="relative block h-full w-full"
@@ -90,7 +88,7 @@
                   </span>
                 </button>
 
-                <!-- Iframe після взаємодії/спостереження -->
+                <!-- Iframe після взаємодії -->
                 <iframe
                   v-else
                   class="h-full w-full"
@@ -110,18 +108,20 @@
           </article>
 
           <div class="pt-3">
-            <button
-              type="button"
+            <a
+              v-if="ctaLocal.href"
+              :href="ctaLocal.href"
               class="inline-flex items-center justify-center rounded-2xl border border-teal-200 bg-white/80 px-4 py-2 text-sm font-semibold text-teal-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:ring-1 hover:ring-teal-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
             >
-              Усі уроки
-            </button>
+              {{ ctaLocal.text }}
+            </a>
           </div>
         </div>
       </div>
     </div>
   </section>
 </template>
+
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
@@ -135,6 +135,10 @@ const props = defineProps({
       title: 'Наші уроки',
       subtitle: 'Баланс розмовної практики, граматики та лексики. Кожне заняття — ще один крок до вільної англійської.'
     })
+  },
+  cta: {
+    type: Object,
+    default: () => ({ text: 'Усі уроки', href: '#lessons' })
   },
   // беремо лише перше з масиву для правої колонки (решта ігнорується)
   videos: {
@@ -150,6 +154,11 @@ const props = defineProps({
 })
 
 const introLocal = computed(() => props.intro)
+const ctaLocal = computed(() => {
+  const text = typeof props.cta?.text === 'string' && props.cta.text.trim() !== '' ? props.cta.text.trim() : 'Усі уроки'
+  const href = typeof props.cta?.href === 'string' && props.cta.href.trim() !== '' ? props.cta.href.trim() : null
+  return { text, href }
+})
 const videosLocal = computed(() => (Array.isArray(props.videos) ? props.videos : []))
 const rightVideo  = computed(() => videosLocal.value[0] || null)
 

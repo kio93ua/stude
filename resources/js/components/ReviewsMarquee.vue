@@ -1,18 +1,29 @@
 <!-- resources/js/components/ReviewsMarquee.vue -->
+
+<!-- resources/js/components/ReviewsMarquee.vue -->
 <template>
   <section
-    class="reviews-marquee relative overflow-hidden bg-gradient-to-br from-[#BFF3E2] via-white to-[#DDF9F2]"
+    class="reviews-marquee relative overflow-hidden section-surface"
     aria-label="Відгуки студентів — безперервна стрічка"
   >
-    <div ref="blobTopLeft" aria-hidden="true" class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-teal-300/30 blur-3xl" />
-    <div ref="blobBottomRight" aria-hidden="true" class="pointer-events-none absolute -bottom-28 -right-32 h-80 w-80 rounded-full bg-teal-400/25 blur-3xl" />
+    <!-- Делікатні плями, які не "вибілюють" фон -->
+    <div
+      ref="blobTopLeft"
+      aria-hidden="true"
+      class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full blur-3xl opacity-10 mix-blend-multiply"
+      style="background: radial-gradient(closest-side, rgba(15,166,160,.55), transparent 70%);"
+    />
+    <div
+      ref="blobBottomRight"
+      aria-hidden="true"
+      class="pointer-events-none absolute -bottom-28 -right-32 h-80 w-80 rounded-full blur-3xl opacity-10 mix-blend-multiply"
+      style="background: radial-gradient(closest-side, rgba(15,166,160,.45), transparent 70%);"
+    />
 
     <div class="mx-auto max-w-7xl px-6 py-16 md:py-24">
       <header class="mx-auto mb-8 max-w-3xl text-center md:mb-12">
-        <p class="inline-block rounded-2xl bg-white/70 px-4 py-1 font-semibold text-slate-700 ring-1 ring-slate-200 backdrop-blur">
-          Наші відгуки
-        </p>
-        <h2 class="mt-4 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+        <p class="badge-muted font-display inline-block mb-3">Наші відгуки</p>
+        <h2 class="heading-1 font-display tracking-tight text-secondary">
           Нам довіряють — результати студентів це наша перевага
         </h2>
       </header>
@@ -137,6 +148,8 @@
     </div>
   </section>
 </template>
+
+
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'

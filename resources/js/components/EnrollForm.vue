@@ -2,25 +2,32 @@
 <template>
   <section
     ref="root"
-    class="relative overflow-hidden bg-gradient-to-br from-[#BFF3E2] via-white to-[#DDF9F2]"
+    class="section-surface relative overflow-hidden py-16 md:py-20"
     aria-labelledby="enroll-heading"
   >
-    <!-- teal blobs (для легкого паралаксу) -->
-    <div ref="blobTL" data-blob="tl" aria-hidden="true"
-         class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-teal-300/30 blur-3xl"></div>
-    <div ref="blobBR" data-blob="br" aria-hidden="true"
-         class="pointer-events-none absolute -bottom-28 -right-32 h-80 w-80 rounded-full bg-teal-400/25 blur-3xl"></div>
+    <!-- делікатні плями, що не ламають фон -->
+    <div
+      ref="blobTL" data-blob="tl" aria-hidden="true"
+      class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full blur-3xl opacity-10 mix-blend-multiply"
+      style="background: radial-gradient(closest-side, rgba(15,166,160,.55), transparent 70%);"
+    ></div>
+    <div
+      ref="blobBR" data-blob="br" aria-hidden="true"
+      class="pointer-events-none absolute -bottom-28 -right-32 h-80 w-80 rounded-full blur-3xl opacity-10 mix-blend-multiply"
+      style="background: radial-gradient(closest-side, rgba(15,166,160,.45), transparent 70%);"
+    ></div>
 
-    <div class="mx-auto max-w-6xl px-6 py-16 md:py-20">
+    <div class="mx-auto max-w-6xl px-6">
       <header class="mx-auto mb-10 text-center max-w-3xl">
-        <h2 id="enroll-heading" class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <!-- за бажанням: бейдж у стилі інших секцій -->
+        <!-- <p class="badge-muted font-display mb-3 inline-block">Залишити заявку</p> -->
+        <h2 id="enroll-heading" class="heading-1 font-display tracking-tight text-secondary">
           Хочете почати навчання або просто дізнатися більше?
         </h2>
-        <p class="mt-3 text-slate-700">
+        <p class="mt-3 text-secondary/85">
           Заповніть коротку форму — ми повернемося до вас протягом дня. Підкажемо, з чого стартувати,
           порекомендуємо програму під ваш рівень і відповімо на всі запитання.
         </p>
-        
       </header>
 
       <!-- live region (присутня в DOM постійно) -->
@@ -52,7 +59,7 @@
             <input
               id="fullName" name="fullName" type="text" required
               v-model.trim="form.fullName"
-              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teал-500"
               aria-describedby="fullName_help"
             />
             <p id="fullName_help" class="mt-1 text-xs text-slate-500">Вкажіть прізвище та ім’я.</p>
@@ -66,7 +73,7 @@
             <input
               id="age" name="age" type="number" min="5" max="100" required
               v-model.number="form.age"
-              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teал-500 focus:ring-teал-500"
               aria-describedby="age_help"
             />
             <p id="age_help" class="mt-1 text-xs text-slate-500">Мінімум 5 років.</p>
@@ -80,7 +87,7 @@
             <select
               id="level" name="level" required
               v-model="form.level"
-              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teал-500 focus:ring-teал-500"
             >
               <option disabled value="">Оберіть рівень</option>
               <option>A1</option><option>A2</option><option>B1</option>
@@ -96,7 +103,7 @@
             <input
               id="phone" name="phone" type="tel" required
               v-model.trim="form.phone"
-              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teал-500 focus:ring-teал-500"
               placeholder="+380..."
             />
           </div>
@@ -109,7 +116,7 @@
             <input
               id="email" name="email" type="email" required
               v-model.trim="form.email"
-              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teал-500 focus:ring-teал-500"
               placeholder="you@example.com"
               inputmode="email" autocomplete="email"
             />
@@ -125,29 +132,29 @@
                 Оберіть, що саме потрібно: безкоштовна консультація, пробний урок чи просто інформація.
               </p>
               <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/70 px-4 py-3 shadow-sm hover:border-teal-300 focus-within:ring-2 focus-within:ring-teal-500">
+                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/70 px-4 py-3 shadow-sm hover:border-teal-300 focus-within:ring-2 focus-within:ring-teал-500">
                   <input
                     type="radio" name="intent" value="consultation" required
                     v-model="form.intent"
-                    class="h-5 w-5 rounded text-teal-600 focus:ring-teal-500"
+                    class="h-5 w-5 rounded text-teal-600 focus:ring-teал-500"
                     aria-describedby="intent_help"
                   />
                   <span class="text-sm font-medium text-slate-700">Консультація</span>
                 </label>
-                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/70 px-4 py-3 shadow-sm hover:border-teal-300 focus-within:ring-2 focus-within:ring-teal-500">
+                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/70 px-4 py-3 shadow-sm hover:border-teал-300 focus-within:ring-2 focus-within:ring-teал-500">
                   <input
                     type="radio" name="intent" value="first_lesson" required
                     v-model="form.intent"
-                    class="h-5 w-5 rounded text-teal-600 focus:ring-teal-500"
+                    class="h-5 w-5 rounded text-teal-600 focus:ring-teал-500"
                     aria-describedby="intent_help"
                   />
                   <span class="text-sm font-medium text-slate-700">Перший урок</span>
                 </label>
-                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/70 px-4 py-3 shadow-sm hover:border-teal-300 focus-within:ring-2 focus-within:ring-teal-500">
+                <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/70 px-4 py-3 shadow-sm hover:border-teал-300 focus-within:ring-2 focus-within:ring-teал-500">
                   <input
                     type="radio" name="intent" value="info" required
                     v-model="form.intent"
-                    class="h-5 w-5 rounded text-teal-600 focus:ring-teal-500"
+                    class="h-5 w-5 rounded text-teal-600 focus:ring-teал-500"
                     aria-describedby="intent_help"
                   />
                   <span class="text-sm font-medium text-slate-700">Дізнатись інформацію</span>
@@ -164,7 +171,7 @@
             <textarea
               id="questions" name="questions" rows="4"
               v-model.trim="form.questions"
-              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"
+              class="mt-1 block w-full rounded-xl border-slate-300 shadow-sm focus:border-teал-500 focus:ring-teал-500"
               placeholder="Коротко опишіть цілі, побажання або запитайте, що цікавить."
             ></textarea>
           </div>
@@ -175,7 +182,7 @@
               <input
                 id="consent" name="consent" type="checkbox" required
                 v-model="form.consent"
-                class="mt-1 h-5 w-5 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                class="mt-1 h-5 w-5 rounded border-slate-300 text-teal-600 focus:ring-teал-500"
                 aria-describedby="consent_help"
               />
               <div>
@@ -196,8 +203,8 @@
               class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-[#0C7C78] to-[#0FA6A0]
                      px-5 py-3 font-semibold text-white shadow-sm ring-1 ring-transparent
                      transition will-change-transform
-                     hover:-translate-y-0.5 hover:ring-teal-200
-                     focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                     hover:-translate-y-0.5 hover:ring-teал-200
+                     focus:outline-none focus:ring-2 focus:ring-teал-500 focus:ring-offset-2"
               :disabled="submitting"
             >
               <span v-if="!submitting">Надіслати заявку</span>
@@ -209,6 +216,7 @@
     </div>
   </section>
 </template>
+
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'

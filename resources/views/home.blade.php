@@ -9,6 +9,35 @@
     /** @var \App\Settings\HomePageSettings $s */
     $s = app(\App\Settings\HomePageSettings::class);
 
+    $normalizeString = function ($value, string $fallback = ''): string {
+        $trimmed = is_string($value) ? trim($value) : trim((string) ($value ?? ''));
+        return $trimmed !== '' ? $trimmed : $fallback;
+    };
+
+    $normalizeUrl = function ($value, string $fallback = '#contact') use ($normalizeString): string {
+        $url = $normalizeString($value, '');
+        return $url !== '' ? $url : $fallback;
+    };
+
+    $normalizeList = function ($value, array $fallback = []): array {
+        if (is_string($value)) {
+            $value = preg_split('/\s*,\s*/', $value, -1, PREG_SPLIT_NO_EMPTY);
+        }
+
+        if (! is_array($value)) {
+            return $fallback;
+        }
+
+        $clean = array_values(array_filter(array_map(static fn($item) => is_string($item)
+            ? trim($item)
+            : (is_array($item)
+                ? trim((string)($item['text'] ?? $item['label'] ?? $item['value'] ?? ($item[0] ?? '')))
+                : ''
+            ), $value), fn($v) => $v !== ''));
+
+        return $clean ?: $fallback;
+    };
+
     // URL картинки: http(s) або файл у "public"
     $heroImageUrl = null;
     if (!empty($s->hero_image_path)) {
@@ -126,21 +155,32 @@
 {{-- === LESSONS (Vue) === --}}
 @php
   // Пропси для LessonsBlock.vue
-  $lessonsProps = [
+ $lessonsProps = [
     'intro' => [
-      'badge'    => 'Програми навчання',
-      'title'    => 'Наші уроки',
-      'subtitle' => 'Баланс розмовної практики, граматики та лексики. Кожне заняття — ще один крок до вільної англійської.',
+      'badge'    => $normalizeString($s->lessons_badge ?? null, 'Програми навчання'),
+      'title'    => $normalizeString($s->lessons_title ?? null, 'Наші уроки'),
+      'subtitle' => $normalizeString($s->lessons_subtitle ?? null, 'Баланс розмовної практики, граматики та лексики. Кожне заняття — ще один крок до вільної англійської.'),
     ],
-    // ЗАМІНИ YouTube ID нижче на свої; можна додавати більше карток
-    'videos' => [
-      ['id' => 'dQw4w9WgXcQ', 'title' => 'Intro: як ми вчимося', 'description' => 'Короткий огляд підходу та структури уроків.'],
-      ['id' => 'ysz5S6PUM-U', 'title' => 'Розмовна практика: small talk', 'description' => 'Фрази для щоденного спілкування.'],
-      ['id' => 'ScMzIvxBSi4', 'title' => 'Граматика без болю: часи', 'description' => 'Як швидко згадати й застосувати часи.'],
-      ['id' => 'kXYiU_JCYtU', 'title' => 'Фразові дієслова', 'description' => 'Корисні конструкції для реальних ситуацій.'],
-    ],
-    // Увімкнути маркери ScrollTrigger (для дебагу): true/false
-    'debugMarkers' => false,
+    'videos' => (function () use ($s) {
+      $raw = is_array($s->lessons_videos ?? null) ? $s->lessons_videos : [];
+      return array_values(array_filter(array_map(function ($item) {
+        if (! is_array($item)) {
+          return null;
+        }
+        $id = trim((string)($item['id'] ?? ''));
+        $title = trim((string)($item['title'] ?? ''));
+        if ($id === '' || $title === '') {
+          return null;
+        }
+        $description = trim((string)($item['description'] ?? ''));
+        return [
+          'id' => $id,
+          'title' => $title,
+          'description' => $description !== '' ? $description : null,
+        ];
+      }, $raw)));
+    })(),
+    'autoplayOnView' => (bool)($s->lessons_autoplay_on_view ?? false),
   ];
 @endphp
 
@@ -162,10 +202,37 @@
 
      {{-- === PRICING (Vue) === --}}
 @php
-  // Мінімальні пропси; якщо треба свої плани/ціни — передай їх тут:
+  $planDefaults = app(\App\Settings\HomePageSettings::class)->pricing_plans;
+  $savedPlans = is_array($s->pricing_plans ?? null) ? $s->pricing_plans : [];
+
+  $buildPlan = function (string $key) use ($planDefaults, $savedPlans, $normalizeString, $normalizeUrl, $normalizeList): array {
+      $defaults = $planDefaults[$key] ?? [];
+      $plan = is_array($savedPlans[$key] ?? null) ? $savedPlans[$key] : [];
+
+      return [
+          'title'       => $normalizeString($plan['title'] ?? null, $defaults['title'] ?? ''),
+          'label'       => $normalizeString($plan['label'] ?? null, $defaults['label'] ?? ''),
+          'description' => $normalizeString($plan['description'] ?? null, $defaults['description'] ?? ''),
+          'price'       => $normalizeString($plan['price'] ?? null, $defaults['price'] ?? ''),
+          'meta'        => $normalizeString($plan['meta'] ?? null, $defaults['meta'] ?? ''),
+          'features'    => $normalizeList($plan['features'] ?? null, (array)($defaults['features'] ?? [])),
+          'cta_text'    => $normalizeString($plan['cta_text'] ?? null, $defaults['cta_text'] ?? ''),
+          'cta_href'    => $normalizeUrl($plan['cta_href'] ?? null, $defaults['cta_href'] ?? '#contact'),
+      ];
+  };
+
+  $pricingPlans = [
+      'group' => $buildPlan('group'),
+      'pair' => $buildPlan('pair'),
+      'individual' => $buildPlan('individual'),
+  ];
+
   $pricingProps = [
-    'currency' => '₴',
-    // 'plans' => [...], // можеш передати масив своїх планів із адмінки/настроювань
+      'badge'     => $normalizeString($s->pricing_badge ?? null, 'Пакети занять'),
+      'title'     => $normalizeString($s->pricing_title ?? null, 'Обери формат, що пасує саме тобі'),
+      'subtitle'  => $normalizeString($s->pricing_subtitle ?? null, 'Три прозорі варіанти з чіткими перевагами.'),
+      'currency'  => $normalizeString($s->pricing_currency ?? null, '₴'),
+      'plans'     => $pricingPlans,
   ];
 @endphp
 
@@ -175,34 +242,94 @@
   data-props='@json($pricingProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
 </div>
 @php
-  $advantagesItems = [
-    [
-      'title'   => 'Ігрові методи',
-      'desc'    => 'Інтерактиви, рольові сценарії та міні-ігри — мотивація росте, страх помилок зникає.',
-      'bullets' => ['Щотижневі челенджі', 'Сценарії з реального життя', 'Веселі практики замість нудної теорії'],
-      'image'   => ['src' => asset('images/adv/gamified.jpg'), 'alt' => 'Ігрові методи'],
-      'icons'   => [],
-    ],
-    [
-      'title'   => 'Сучасна програма вивчення',
-      'desc'    => 'Комунікативний підхід, мікрозвички та трек прогресу — чіткий результат щотижня.',
-      'bullets' => ['Модульна структура', 'Практика > теорія', 'Персональні рекомендації'],
-      'image'   => ['src' => asset('images/adv/modern.jpg'), 'alt' => 'Сучасна програма'],
-      'icons'   => [],
-    ],
-    [
-      'title'   => 'Задоволені учні',
-      'desc'    => 'Тепла дружня атмосфера й підтримка — легше говорити впевнено.',
-      'bullets' => ['Малі групи або 1-на-1', 'Зворотний зв’язок щотижня', 'Клуби розмовної практики'],
-      'image'   => ['src' => asset('images/adv/happy.jpg'), 'alt' => 'Задоволені учні'],
-      'icons'   => [],
-    ],
+  $rawAdvantages = is_array($s->advantages_items ?? null) ? $s->advantages_items : [];
+  $toUrl = function (?string $path) {
+      $trimmed = is_string($path) ? trim($path) : '';
+      if ($trimmed === '') {
+          return null;
+      }
+      if (Str::startsWith($trimmed, ['http://', 'https://', '/'])) {
+          return $trimmed;
+      }
+      return Storage::disk('public')->url($trimmed);
+  };
+
+  $advantagesItems = [];
+  foreach ($rawAdvantages as $entry) {
+      if (! is_array($entry)) {
+          continue;
+      }
+
+      $title = $normalizeString($entry['title'] ?? null, '');
+      $imageUrl = $toUrl($entry['image_path'] ?? null);
+      if ($title === '' || ! $imageUrl) {
+          continue;
+      }
+
+      $desc = $normalizeString($entry['desc'] ?? null, '');
+      $desc = $desc !== '' ? $desc : null;
+      $bullets = $normalizeList($entry['bullets'] ?? null, []);
+
+      $icons = [];
+      if (is_array($entry['icons'] ?? null)) {
+          foreach ($entry['icons'] as $iconPath) {
+              $iconUrl = $toUrl(is_string($iconPath) ? $iconPath : null);
+              if ($iconUrl) {
+                  $icons[] = $iconUrl;
+              }
+          }
+      }
+
+      $advantagesItems[] = [
+          'title'   => $title,
+          'desc'    => $desc,
+          'bullets' => $bullets,
+          'image'   => [
+              'src' => $imageUrl,
+              'alt' => $normalizeString($entry['image_alt'] ?? null, $title),
+          ],
+          'icons'   => $icons,
+      ];
+  }
+
+  if ($advantagesItems === []) {
+      $defaults = app(\App\Settings\HomePageSettings::class)->advantages_items;
+      foreach ($defaults as $entry) {
+          $imageUrl = $toUrl($entry['image_path'] ?? null);
+          if (! $imageUrl) {
+              continue;
+          }
+          $desc = $normalizeString($entry['desc'] ?? null, '');
+          $desc = $desc !== '' ? $desc : null;
+          $advantagesItems[] = [
+              'title'   => $normalizeString($entry['title'] ?? null, ''),
+              'desc'    => $desc,
+              'bullets' => $normalizeList($entry['bullets'] ?? null, []),
+              'image'   => [
+                  'src' => $imageUrl,
+                  'alt' => $normalizeString($entry['image_alt'] ?? null, ''),
+              ],
+              'icons'   => [],
+          ];
+      }
+  }
+
+  $advSubtitle = $normalizeString($s->advantages_subtitle ?? null, '');
+  $advantagesProps = [
+      'badge'    => $normalizeString($s->advantages_badge ?? null, 'Переваги навчання'),
+      'title'    => $normalizeString($s->advantages_title ?? null, 'Вчися ефективно — у зручному для тебе форматі'),
+      'subtitle' => $advSubtitle !== '' ? $advSubtitle : null,
+      'cta'      => [
+          'text' => $normalizeString($s->advantages_cta_text ?? null, 'Записатися'),
+          'href' => $normalizeUrl($s->advantages_cta_href ?? null, '#contact'),
+      ],
+      'items'    => $advantagesItems,
   ];
 @endphp
 
 <div
   data-vue="AdvantagesSplit"
-  data-props='@json(["items" => $advantagesItems], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+  data-props='@json($advantagesProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
 </div>
 @php
   $reviewsProps = [
@@ -221,25 +348,36 @@
 </div>
 {{-- === FAQ (Vue) === --}}
 @php
-  $faqItems = [
-    ['q' => 'Скільки часу потрібно, щоб заговорити?',       'a' => '8–12 тижнів за планом: щоденні міні-сесії + 1–2 розмовні уроки на тиждень.'],
-    ['q' => 'Граматика обовʼязкова?',                        'a' => 'Лише ~20% від заняття. Подання — через приклади й одразу в говорінні.'],
-    ['q' => 'Онлайн чи офлайн?',                             'a' => 'Формат змішаний: обираєте за графіком. Є запис пропущених занять.'],
-    ['q' => 'З яких рівнів навчаємо?',                       'a' => 'Від Starter/A1 до Upper-Intermediate/B2. Є підготовчі групи для старту з нуля.'],
-    ['q' => 'Чи є домашні?',                                 'a' => 'Так, короткі практики 10–15 хв щодня + трек мотивації.'],
-    ['q' => 'Матеріали включені?',                           'a' => 'Так. Доступ до конспектів, карток і відео в LMS.'],
-    ['q' => 'Є speaking-клуби?',                             'a' => 'Щотижня: тематичні зустрічі з тьютором, міні-проєкти й дебати.'],
-    ['q' => 'Групи чи індивідуальні?',                       'a' => 'Обидва варіанти. У групах 6–8 людей; 1-на-1 — за індивідуальним планом.'],
-    ['q' => 'Оплата і повернення?',                          'a' => 'Оплата помісячно; повернення за правилами договору до початку модуля.'],
-    ['q' => 'Пауза/заморозка?',                               'a' => 'Можна заморозити абонемент до 30 днів без втрати місця.'],
-    ['q' => 'Готуєте до IELTS/співбесіди?',                  'a' => 'Так, окремі треки зі speaking/writing та мок-інтервʼю.'],
-    ['q' => 'Як стартуємо?',                                  'a' => 'Безкоштовна діагностика рівня та рекомендації — далі старт із найближчим потоком.'],
-  ];
+  $rawFaq = is_array($s->faq_items ?? null) ? $s->faq_items : [];
+  $faqItems = [];
 
+  foreach ($rawFaq as $entry) {
+      if (! is_array($entry)) {
+          continue;
+      }
+
+      $question = $normalizeString($entry['q'] ?? null, '');
+      $answer = trim((string) ($entry['a'] ?? ''));
+
+      if ($question === '' || $answer === '') {
+          continue;
+      }
+
+      $faqItems[] = [
+          'q' => $question,
+          'a' => $answer,
+      ];
+  }
+
+  if ($faqItems === []) {
+      $faqItems = app(\App\Settings\HomePageSettings::class)->faq_items;
+  }
+
+  $faqSubtitle = $normalizeString($s->faq_subtitle ?? null, '');
   $faqProps = [
-    'title'    => 'FAQ (коротко)',
-    'subtitle' => 'Короткі відповіді про формати, терміни та підхід Study Buddy. Якщо не знайшли своє — напишіть нам, підкажемо.',
-    'items'    => $faqItems,
+      'title'    => $normalizeString($s->faq_title ?? null, 'FAQ (коротко)'),
+      'subtitle' => $faqSubtitle !== '' ? $faqSubtitle : null,
+      'items'    => $faqItems,
   ];
 @endphp
 

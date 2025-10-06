@@ -1,10 +1,29 @@
 <template>
-  <section ref="root" id="hero" class="overflow-hidden bg-gradient-to-br from-brand-mint via-white to-brand-aqua/10">
-    <div class="mx-auto grid max-w-6xl gap-10 px-6 pb-16 pt-20 md:grid-cols-2 md:items-center">
+  <section ref="root" id="hero" class="section-surface relative overflow-hidden py-16 sm:py-24">
+    <!-- декоративний шар всередині секції (не торкається країв, без швів) -->
+    
+    <div
+      aria-hidden
+      class="pointer-events-none absolute inset-[clamp(12px,3vw,36px)] -z-10 rounded-[2rem]"
+      style="
+        isolation:isolate;
+        background-image:
+          radial-gradient(24rem 24rem at 8% 10%, rgba(12,124,120,.16), transparent 60%),
+          radial-gradient(20rem 20rem at 90% 88%, rgba(15,166,160,.14), transparent 62%);
+        background-repeat:no-repeat;
+      "
+    ></div>
+
+    <div class="mx-auto grid max-w-6xl gap-10 px-6 md:grid-cols-2 md:items-center">
+      <!-- Ліва колонка -->
       <div ref="leftCol" class="space-y-6">
         <span v-if="badge" ref="badgeEl" class="badge-muted font-display">{{ badge }}</span>
-        <component ref="titleEl" :is="headingTag" class="heading-1 font-display tracking-tight">{{ title }}</component>
-        <p ref="subtitleEl" class="text-lg text-muted font-sans">{{ subtitle }}</p>
+        <component ref="titleEl" :is="headingTag" class="heading-1 font-display tracking-tight text-secondary">
+          {{ title }}
+        </component>
+        <p ref="subtitleEl" class="text-lg text-secondary/85 font-sans">
+          {{ subtitle }}
+        </p>
 
         <div ref="ctaEl" class="flex flex-col gap-3 sm:flex-row">
           <a v-if="primary?.href && primary?.text" :href="primary.href" class="btn-primary font-display">{{ primary.text }}</a>
@@ -12,10 +31,9 @@
         </div>
       </div>
 
+      <!-- Права колонка -->
       <div class="relative">
-        <div aria-hidden="true" class="absolute -left-10 top-10 hidden h-24 w-24 rounded-full bg-muted/60 blur-3xl md:block"></div>
-        <div aria-hidden="true" class="absolute -right-8 bottom-4 hidden h-20 w-20 rounded-full bg-accent/30 blur-2xl md:block"></div>
-
+        <!-- верхній ікон-блок (залишаємо, але безпечний для фону) -->
         <div ref="iconTop" class="pointer-events-none absolute -top-12 -left-14 md:-top-14 md:-left-16 z-10" :style="topIconStyle">
           <picture v-if="top1x">
             <source type="image/webp" :srcset="`${top1x} 1x, ${top2x} 2x`" />
@@ -43,17 +61,18 @@
 
             <h2 class="text-lg font-semibold text-secondary font-display">{{ listTitle }}</h2>
 
-            <ul v-if="visibleBullets.length" ref="bulletsEl" class="space-y-3 text-sm text-muted font-sans">
+            <ul v-if="visibleBullets.length" ref="bulletsEl" class="space-y-3 text-sm text-secondary/85 font-sans">
               <li v-for="(item, i) in visibleBullets" :key="i" class="flex items-start gap-3">
-                <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary"></span>
+                <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-teal-600"></span>
                 <span>{{ item }}</span>
               </li>
               <slot name="extra"></slot>
             </ul>
-            <p v-else class="text-sm text-muted/60 font-sans">(Налаштуйте «Список переваг» у адмінці)</p>
+            <p v-else class="text-sm text-secondary/60 font-sans">(Налаштуйте «Список переваг» у адмінці)</p>
           </div>
         </div>
 
+        <!-- нижній ікон-блок -->
         <div ref="iconBottom" class="pointer-events-none absolute -bottom-14 -right-14 md:-bottom-16 md:-right-20 z-10" :style="bottomIconStyle">
           <picture v-if="bottom1x">
             <source type="image/webp" :srcset="`${bottom1x} 1x, ${bottom2x} 2x`" />
@@ -66,6 +85,7 @@
     </div>
   </section>
 </template>
+
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed, nextTick } from 'vue'

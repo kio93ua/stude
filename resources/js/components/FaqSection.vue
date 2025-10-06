@@ -1,16 +1,18 @@
 <!-- FaqSection.vue -->
 <template>
   <section
-    class="relative py-16 bg-gradient-to-b from-[#BFF3E2] via-white to-[#DDF9F2]"
+    class="section-surface py-16 md:py-24"
     aria-labelledby="faq-heading"
     ref="rootEl"
   >
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <header class="mb-10">
-        <h2 id="faq-heading" class="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+      <header class="mx-auto mb-10 max-w-3xl text-center">
+        <!-- за бажанням можна додати бейдж:
+        <p class="badge-muted font-display mb-3">Питання та відповіді</p> -->
+        <h2 id="faq-heading" class="heading-1 font-display tracking-tight text-secondary">
           {{ computedTitle }}
         </h2>
-        <p v-if="computedSubtitle" class="mt-3 text-slate-700 max-w-[70ch] leading-relaxed">
+        <p v-if="computedSubtitle" class="mt-3 text-secondary/85 max-w-[70ch] leading-relaxed font-sans mx-auto">
           {{ computedSubtitle }}
         </p>
       </header>
@@ -56,6 +58,8 @@
               :style="panelStyle(i)"
               role="region"
               :aria-labelledby="headingId(i)"
+              :aria-hidden="!isOpen(i)"
+              :inert="!isOpen(i) ? '' : null"
             >
               <div class="prose prose-slate max-w-none p-4 pt-0 lg:p-5 lg:pt-0">
                 <div class="max-w-[70ch]" v-html="list[i].a" />
@@ -103,6 +107,8 @@
               :style="panelStyle(i)"
               role="region"
               :aria-labelledby="headingId(i)"
+              :aria-hidden="!isOpen(i)"
+              :inert="!isOpen(i) ? '' : null"
             >
               <div class="prose prose-slate max-w-none p-4 pt-0 lg:p-5 lg:pt-0">
                 <div class="max-w-[70ch]" v-html="list[i].a" />
@@ -117,6 +123,7 @@
     <script type="application/ld+json">{{ jsonLd }}</script>
   </section>
 </template>
+
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
@@ -270,5 +277,67 @@ watch(list, () => {
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .transition-\[max-height,opacity\] { transition: none !important; }
+}
+/* === Глобалізуємо стилі прайсу, щоб працювали поза FaqSection.vue === */
+:global(.price-card:hover .sticker-bottom) { transform: translateY(-2px); }
+:global(.price-card:hover .sticker-bottom::before) { opacity: 1; filter: blur(6px); }
+
+/* БАЗА для декоративного «стікера» — інакше ::before не видно */
+:global(.sticker-bottom) {
+  position: relative;            /* потрібно для абсолютного ::before */
+}
+:global(.sticker-bottom::before) {
+  content: "";                    /* створюємо псевдоелемент */
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 10px;                   /* підсвітка/післясвітіння під стикером */
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgba(0,0,0,.12), rgba(0,0,0,0));
+  opacity: 0;                     /* активується на hover/active */
+  filter: blur(0);
+  transition: opacity .3s ease, filter .3s ease;
+  pointer-events: none;
+}
+
+/* Хвильові плями — обовʼязково мати контекст позиціювання */
+:global(.wave) { position: relative; }
+:global(.wave::before),
+:global(.wave::after) {
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  border-radius:50%;
+  opacity:0;
+  transform:scale(.6);
+  transition: opacity .38s ease, transform .7s cubic-bezier(.2,.6,.2,1);
+}
+:global(.wave::before){
+  width:240px; height:240px; right:-48px; top:-48px;
+  background: radial-gradient(closest-side, rgba(255,255,255,.55), transparent 70%);
+  filter: blur(6px);
+}
+:global(.wave::after){
+  width:280px; height:280px; left:-58px; bottom:-58px;
+  background: radial-gradient(closest-side, rgba(var(--hl), .35), transparent 70%);
+  filter: blur(8px);
+}
+:global(.wave:hover::before),
+:global(.wave:hover::after) { opacity:1; transform:scale(1); }
+
+/* --- Постійно активна (лише для другої картки) --- */
+:global(.price-card--active .sticker-bottom) { transform: translateY(-2px); }
+:global(.price-card--active .sticker-bottom::before) { opacity: 1; filter: blur(6px); }
+:global(.wave--active::before),
+:global(.wave--active::after) { opacity: 1; transform: scale(1); }
+
+/* Обережно з will-change — тільки там, де є анімації */
+:global(.sticker-bottom) { will-change: transform, opacity; }
+:global(.wave::before), :global(.wave::after) { will-change: transform, opacity; }
+
+/* === Accessibility: менше руху для тих, хто просить === */
+@media (prefers-reduced-motion: reduce) {
+  .transition-\[max-height,opacity\] { transition: none !important; }
+  :global(.price-card *),
+  :global(.wave::before), :global(.wave::after) { transition: none !important; }
 }
 </style>

@@ -2,33 +2,31 @@
 <template>
   <section
     ref="root"
-    class="relative overflow-hidden bg-gradient-to-br from-[#BFF3E2] via-white to-[#DDF9F2]"
+    class="section-surface relative overflow-hidden py-16 md:py-24"
     aria-labelledby="vacancy-title"
   >
-    <!-- декоративні плями -->
+    <!-- делікатні плями (не ламають фон) -->
     <div
       ref="blobL"
       aria-hidden="true"
-      class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full blur-3xl"
-      :style="{ background: 'linear-gradient(135deg, rgba(12,124,120,0.35), rgba(15,166,160,0.2))' }"
+      class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full blur-3xl opacity-10 mix-blend-multiply"
+      style="background: radial-gradient(closest-side, rgba(12,124,120,.55), transparent 70%);"
     />
     <div
       ref="blobR"
       aria-hidden="true"
-      class="pointer-events-none absolute -bottom-28 -right-32 h-80 w-80 rounded-full blur-3xl"
-      :style="{ background: 'linear-gradient(135deg, rgba(15,166,160,0.3), rgba(12,124,120,0.2))' }"
+      class="pointer-events-none absolute -bottom-28 -right-32 h-80 w-80 rounded-full blur-3xl opacity-10 mix-blend-multiply"
+      style="background: radial-gradient(closest-side, rgba(15,166,160,.45), transparent 70%);"
     />
 
-    <div class="mx-auto max-w-7xl px-6 py-16 md:py-24">
+    <div class="mx-auto max-w-7xl px-6">
       <!-- заголовок -->
       <header ref="headerRef" class="mx-auto mb-10 max-w-3xl text-center">
-        <p class="inline-block rounded-2xl bg-white/70 px-4 py-1 font-semibold text-slate-700 ring-1 ring-slate-200 backdrop-blur">
-          Вакансія
-        </p>
-        <h2 id="vacancy-title" class="mt-4 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+        <p class="badge-muted font-display inline-block">Вакансія</p>
+        <h2 id="vacancy-title" class="heading-1 font-display tracking-tight text-secondary mt-4">
           Запрошуємо вчителів англійської
         </h2>
-        <p class="mt-3 text-slate-700 tracking-tight">
+        <p class="mt-3 text-secondary/85">
           Гнучкий графік, сучасні матеріали та дружня команда. Розвивайся разом із нами й впливай на результати студентів.
         </p>
       </header>
@@ -71,7 +69,7 @@
                 Чому з нами класно
               </p>
 
-              <h3 ref="titleRef" class="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+              <h3 ref="titleRef" class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">
                 Рости разом із школою — ми підтримуємо ініціативу
               </h3>
 
@@ -129,6 +127,7 @@
     </div>
   </section>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
