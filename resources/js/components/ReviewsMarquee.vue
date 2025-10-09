@@ -1,12 +1,9 @@
 <!-- resources/js/components/ReviewsMarquee.vue -->
-
-<!-- resources/js/components/ReviewsMarquee.vue -->
 <template>
   <section
     class="reviews-marquee relative overflow-hidden section-surface"
     aria-label="Відгуки студентів — безперервна стрічка"
   >
-    <!-- Делікатні плями, які не "вибілюють" фон -->
     <div
       ref="blobTopLeft"
       aria-hidden="true"
@@ -22,13 +19,10 @@
 
     <div class="mx-auto max-w-7xl px-6 py-16 md:py-24">
       <header class="mx-auto mb-8 max-w-3xl text-center md:mb-12">
-        <p class="badge-muted font-display inline-block mb-3">Наші відгуки</p>
-        <h2 class="heading-1 font-display tracking-tight text-secondary">
-          Нам довіряють — результати студентів це наша перевага
-        </h2>
+        <p v-if="badgeText" class="badge-muted font-display inline-block mb-3">{{ badgeText }}</p>
+        <h2 class="heading-1 font-display tracking-tight text-secondary">{{ titleText }}</h2>
       </header>
 
-      <!-- Трек #1 -->
       <div class="relative" aria-label="Стрічка відгуків — трек 1">
         <Swiper
           :modules="swiperModules"
@@ -50,7 +44,7 @@
           @swiper="onSwiper1"
           @autoplayStop="scheduleResume1"
         >
-          <SwiperSlide v-for="(r,i) in track1" :key="'t1-'+i" class="!w-auto">
+          <SwiperSlide v-for="(r,i) in track1" :key="`t1-${i}`" class="!w-auto">
             <article
               class="group w-[320px] sm:w-[380px] md:w-[460px] lg:w-[520px]
                      me-5 rounded-2xl bg-white/80 backdrop-blur ring-1 ring-slate-200
@@ -62,7 +56,7 @@
               tabindex="0" aria-label="Картка відгуку"
             >
               <div class="flex items-center gap-4">
-                <img :src="r.avatar" :alt="'Аватар ' + (r.name || 'студента')"
+                <img :src="r.avatar" :alt="`Аватар ${r.name}`"
                      class="h-14 w-14 md:h-16 md:w-16 rounded-full object-cover ring-1 ring-slate-200/70"
                      loading="lazy" width="64" height="64" />
                 <div class="min-w-0">
@@ -74,8 +68,8 @@
                     </span>
                   </div>
                   <div class="mt-1 text-[14px] md:text-[15px] leading-none text-teal-600" role="img"
-                       :aria-label="`Рейтинг: ${Math.min(5, Math.max(0, r.stars ?? 5))} з 5`">
-                    {{ '★★★★★'.slice(0, Math.min(5, Math.max(0, r.stars ?? 5))) }}
+                       :aria-label="`Рейтинг: ${r.stars} з 5`">
+                    {{ '★★★★★'.slice(0, r.stars) }}
                   </div>
                 </div>
               </div>
@@ -87,7 +81,6 @@
         </Swiper>
       </div>
 
-      <!-- Трек #2 (reverse, md+) -->
       <div class="relative mt-8 hidden md:block" aria-label="Стрічка відгуків — трек 2">
         <Swiper
           :modules="swiperModules"
@@ -109,7 +102,7 @@
           @swiper="onSwiper2"
           @autoplayStop="scheduleResume2"
         >
-          <SwiperSlide v-for="(r,i) in track2" :key="'t2-'+i" class="!w-auto">
+          <SwiperSlide v-for="(r,i) in track2" :key="`t2-${i}`" class="!w-auto">
             <article
               class="group w-[320px] sm:w-[380px] md:w-[460px] lg:w-[520px]
                      me-5 rounded-2xl bg-white/80 backdrop-blur ring-1 ring-slate-200
@@ -121,7 +114,7 @@
               tabindex="0" aria-label="Картка відгуку"
             >
               <div class="flex items-center gap-4">
-                <img :src="r.avatar" :alt="'Аватар ' + (r.name || 'студента')"
+                <img :src="r.avatar" :alt="`Аватар ${r.name}`"
                      class="h-14 w-14 md:h-16 md:w-16 rounded-full object-cover ring-1 ring-slate-200/70"
                      loading="lazy" width="64" height="64" />
                 <div class="min-w-0">
@@ -133,8 +126,8 @@
                     </span>
                   </div>
                   <div class="mt-1 text-[14px] md:text-[15px] leading-none text-teal-600" role="img"
-                       :aria-label="`Рейтинг: ${Math.min(5, Math.max(0, r.stars ?? 5))} з 5`">
-                    {{ '★★★★★'.slice(0, Math.min(5, Math.max(0, r.stars ?? 5))) }}
+                       :aria-label="`Рейтинг: ${r.stars} з 5`">
+                    {{ '★★★★★'.slice(0, r.stars) }}
                   </div>
                 </div>
               </div>
@@ -145,11 +138,29 @@
           </SwiperSlide>
         </Swiper>
       </div>
+
+      <div class="mt-12 text-center">
+        <a
+          :href="buttonData.href"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-outline inline-flex items-center gap-2 rounded-xl px-5 py-3 font-display
+                 ring-1 ring-teal-300/60 text-teal-800 hover:bg-teal-50/70 hover:ring-teal-400
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/70"
+          aria-label="Більше відгуків — відкриється в новій вкладці"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-6 6M8.25 7.5H7.5A2.25 2.25 0 0 0 5.25 9.75v6A2.25 2.25 0 0 0 7.5 18h6a2.25 2.25 0 0 0 2.25-2.25v-.75" />
+          </svg>
+          <span>{{ buttonData.text }}</span>
+        </a>
+        <p class="mt-2 text-sm text-secondary/70">
+          Перейдіть у наш профіль — там ще більше сторіз і відгуків від студентів.
+        </p>
+      </div>
     </div>
   </section>
 </template>
-
-
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
@@ -158,37 +169,95 @@ import { Autoplay, FreeMode, A11y } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/free-mode'
 
-type Review = { name: string; avatar: string; text: string; stars?: number; course?: string }
-const props = defineProps<{ reviews?: Review[] }>()
-const swiperModules = [Autoplay, FreeMode, A11y]
+type Review = { name: string; avatar: string; text: string; stars: number; course?: string }
+type ReviewInput = { name?: string; avatar?: string; text?: string; stars?: number; course?: string | null }
 
-const unique = computed(() => (Array.isArray(props.reviews) ? props.reviews.length : 0))
+const FALLBACK_BADGE = 'Наші відгуки'
+const FALLBACK_TITLE = 'Нам довіряють — результати студентів це наша перевага'
+const FALLBACK_BUTTON_TEXT = 'Більше відгуків в Instagram'
+const FALLBACK_BUTTON_URL = 'https://instagram.com/your.profile'
+const FALLBACK_REVIEWS: Review[] = [
+  { name: 'Марія Коваль', avatar: 'https://i.pravatar.cc/96?img=1', stars: 5, course: 'IELTS', text: 'Класні уроки, багато розмовної практики і чіткий план підготовки. За місяць стала впевненіше говорити, рекомендую!' },
+  { name: 'Олег С.', avatar: 'https://i.pravatar.cc/96?img=2', stars: 5, course: 'Business English', text: 'Сучасні завдання, реальні кейси з роботи. Дуже подобається формат — завжди тримає фокус і дає результат.' },
+  { name: 'Ірина Ч.', avatar: 'https://i.pravatar.cc/96?img=3', stars: 5, course: 'General', text: 'Дуже комфортно й ефективно. Індивідуальний підхід, помітний прогрес вже за кілька тижнів.' },
+  { name: 'Андрій П.', avatar: 'https://i.pravatar.cc/96?img=4', stars: 5, course: 'Speaking Club', text: 'Динамічні зустрічі, багато говоріння, виправлення помилок у реальному часі — супер!' },
+]
+
+const props = defineProps<{
+  badge?: string
+  title?: string
+  buttonText?: string
+  buttonUrl?: string
+  reviews?: ReviewInput[]
+}>()
+
+const trimString = (value: unknown, fallback = ''): string => {
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    return trimmed !== '' ? trimmed : fallback
+  }
+  if (typeof value === 'number') {
+    const trimmed = String(value).trim()
+    return trimmed !== '' ? trimmed : fallback
+  }
+  return fallback
+}
+
+const badgeText = computed(() => trimString(props.badge, FALLBACK_BADGE))
+const titleText = computed(() => trimString(props.title, FALLBACK_TITLE))
+const buttonData = computed(() => ({
+  text: trimString(props.buttonText, FALLBACK_BUTTON_TEXT),
+  href: trimString(props.buttonUrl, FALLBACK_BUTTON_URL),
+}))
+
+const normalizedReviews = computed<Review[]>(() => {
+  if (! Array.isArray(props.reviews)) {
+    return []
+  }
+
+  return props.reviews
+    .map((item) => {
+      const name = trimString(item?.name, '')
+      const text = trimString(item?.text, '')
+      if (name === '' || text === '') {
+        return null
+      }
+
+      const course = trimString(item?.course ?? '', '') || undefined
+      const starsRaw = typeof item?.stars === 'number' ? item.stars : Number(item?.stars)
+      let stars = Number.isFinite(starsRaw) ? Math.round(starsRaw) : 5
+      stars = Math.max(0, Math.min(5, stars))
+
+      const avatarCandidate = trimString(item?.avatar, '')
+      const avatar = avatarCandidate !== '' ? avatarCandidate : 'https://i.pravatar.cc/96?img=7'
+
+      return { name, text, course, stars, avatar }
+    })
+    .filter((entry): entry is Review => entry !== null)
+})
+
+const baseReviews = computed(() => (normalizedReviews.value.length ? normalizedReviews.value : FALLBACK_REVIEWS))
+const unique = computed(() => baseReviews.value.length)
 const canLoop = computed(() => unique.value >= 3)
 
 const reduceMotion = typeof window !== 'undefined'
   ? window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true
   : false
+
 const autoplayBase = reduceMotion ? false : { delay: 0, disableOnInteraction: false, pauseOnMouseEnter: true }
 const autoplayOpts1 = autoplayBase
 const autoplayOpts2 = autoplayBase && typeof autoplayBase === 'object'
   ? { ...autoplayBase, reverseDirection: true }
   : autoplayBase
 
-const sample: Review[] = [
-  { name:'Марія Коваль',  avatar:'https://i.pravatar.cc/96?img=1', stars:5, course:'IELTS',            text:'Класні уроки, багато розмовної практики і чіткий план підготовки. За місяць стала впевненіше говорити, рекомендую!' },
-  { name:'Олег С.',       avatar:'https://i.pravatar.cc/96?img=2', stars:5, course:'Business English', text:'Сучасні завдання, реальні кейси з роботи. Дуже подобається формат — завжди тримає фокус і дає результат.' },
-  { name:'Ірина Ч.',      avatar:'https://i.pravatar.cc/96?img=3', stars:5, course:'General',          text:'Дуже комфортно й ефективно. Індивідуальний підхід, помітний прогрес вже за кілька тижнів.' },
-  { name:'Андрій П.',     avatar:'https://i.pravatar.cc/96?img=4', stars:5, course:'Speaking Club',    text:'Динамічні зустрічі, багато говоріння, виправлення помилок у реальному часі — супер!' },
-  { name:'Наталія Д.',    avatar:'https://i.pravatar.cc/96?img=5', stars:5, course:'CEFR B2',          text:'Матеріали сучасні, домашні завдання по суті. Дуже подобається підтримка між уроками.' },
-]
+const track1 = computed(() => baseReviews.value.concat(baseReviews.value))
+const track2Base = computed(() => [...baseReviews.value].reverse())
+const track2 = computed(() => track2Base.value.concat(track2Base.value))
 
-const base = computed<Review[]>(() => unique.value ? (props.reviews as Review[]) : sample)
-const track1 = computed(() => base.value.concat(base.value))
-const track2 = computed(() => base.value.slice().reverse().concat(base.value.slice().reverse()))
+const swiperModules = [Autoplay, FreeMode, A11y]
 
 const blobTopLeft = ref<HTMLElement | null>(null)
 const blobBottomRight = ref<HTMLElement | null>(null)
-
 const sw1 = ref<any | null>(null)
 const sw2 = ref<any | null>(null)
 let resumeT1: ReturnType<typeof setTimeout> | null = null
@@ -207,14 +276,16 @@ function scheduleResume2() {
 }
 
 onMounted(async () => {
-  try {
-    const { gsap } = await import('gsap')
-    const { ScrollTrigger } = await import('gsap/ScrollTrigger')
-    gsap.registerPlugin(ScrollTrigger)
-    gsap.timeline({ scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.6 } })
-      .to(blobTopLeft.value, { x: 60, y: 40 }, 0)
-      .to(blobBottomRight.value, { x: -80, y: -50 }, 0)
-  } catch {}
+    try {
+        const { gsap } = await import('gsap')
+        const { ScrollTrigger } = await import('gsap/ScrollTrigger')
+        gsap.registerPlugin(ScrollTrigger)
+        gsap.timeline({ scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.6 } })
+          .to(blobTopLeft.value, { x: 60, y: 40 }, 0)
+          .to(blobBottomRight.value, { x: -80, y: -50 }, 0)
+    } catch (error) {
+        console.warn('GSAP lazy load failed', error)
+    }
 })
 </script>
 

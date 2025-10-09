@@ -14,15 +14,20 @@
         return $trimmed !== '' ? $trimmed : $fallback;
     };
 
-    $normalizeUrl = function ($value, string $fallback = '#contact') use ($normalizeString): string {
-        $url = $normalizeString($value, '');
-        return $url !== '' ? $url : $fallback;
-    };
+  $normalizeUrl = function ($value, string $fallback = '#contact') use ($normalizeString): string {
+      $url = $normalizeString($value, '');
+      return $url !== '' ? $url : $fallback;
+  };
 
-    $normalizeList = function ($value, array $fallback = []): array {
-        if (is_string($value)) {
-            $value = preg_split('/\s*,\s*/', $value, -1, PREG_SPLIT_NO_EMPTY);
-        }
+  $normalizeOptionalUrl = function ($value): ?string {
+      $trimmed = is_string($value) ? trim($value) : trim((string) ($value ?? ''));
+      return $trimmed !== '' ? $trimmed : null;
+  };
+
+  $normalizeList = function ($value, array $fallback = []): array {
+      if (is_string($value)) {
+          $value = preg_split('/\s*,\s*/', $value, -1, PREG_SPLIT_NO_EMPTY);
+      }
 
         if (! is_array($value)) {
             return $fallback;
@@ -87,60 +92,113 @@
   @include('partials.hero-skeleton')
 </div>
 @php
+  /** @var \App\Settings\HomePageSettings $s */
+  $s = app(\App\Settings\HomePageSettings::class);
+
+  // побудова URL зображення: пріоритет — зовнішній URL, інакше локальний storage
+  $vacancyImageUrl = null;
+  if (!empty($s->vacancy_media_url)) {
+      $vacancyImageUrl = trim($s->vacancy_media_url);
+  } elseif (!empty($s->vacancy_media_path)) {
+      $vacancyImageUrl = \Illuminate\Support\Str::startsWith($s->vacancy_media_path, ['http://','https://','/'])
+          ? $s->vacancy_media_path
+          : \Illuminate\Support\Facades\Storage::disk('public')->url($s->vacancy_media_path);
+  }
+
   $vacancyProps = [
-    'mediaSrc' => '/images/teacher-apply.webp',
-    'formUrl'  => 'https://docs.google.com/forms/d/e/1FAIpQLSew8oe-A0p3wS7omGT_u3h9ts04egW_Mr0SfIgYzXn8tQUekA/viewform?usp=header',
+      'badge'    => trim((string)$s->vacancy_badge),
+      'title'    => trim((string)$s->vacancy_title),
+      'subtitle' => trim((string)($s->vacancy_subtitle ?? '')) ?: null,
+      'bullets'  => is_array($s->vacancy_bullets) ? array_values(array_filter(array_map('trim', $s->vacancy_bullets))) : [],
+      'mediaSrc' => $vacancyImageUrl ?: '/images/teacher-apply.webp',
+      'ctaText'  => trim((string)$s->vacancy_cta_text),
+      'formUrl'  => trim((string)$s->vacancy_cta_url),
   ];
 @endphp
 
 <div data-vue="TeacherVacancy"
      data-props='@json($vacancyProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'></div>
 
+
   
   {{-- === FOUNDER STORY (Vue) === --}}
 @php
-  $founder = [
-    'name'   => 'Олена Коваль',
-    'role'   => 'Засновниця школи англійської',
-    'photo'  => [
-      'src' => asset('images/founder.png'),
-      'alt' => 'Портрет засновниці',
-    ],
-    'socials' => [
-      'linkedin' => 'https://www.linkedin.com/',
-      'instagram'=> 'https://www.instagram.com/',
-      'site'     => 'https://example.com',
-    ],
+  $founderPhotoPath = $s->founder_photo_path ?? null;
+  $founderPhotoUrl = null;
+  if ($founderPhotoPath) {
+      $founderPhotoUrl = \Illuminate\Support\Str::startsWith($founderPhotoPath, ['http://', 'https://'])
+          ? $founderPhotoPath
+          : \Illuminate\Support\Facades\Storage::disk('public')->url($founderPhotoPath);
+  }
+  $founderPhotoUrl = $founderPhotoUrl ?: asset('images/founder.png');
+
+  $mapStorySections = function ($source, bool $withQuote = false) use ($normalizeString, $normalizeList) {
+      if (! is_array($source)) {
+          return [];
+      }
+
+      $result = [];
+      foreach ($source as $entry) {
+          if (! is_array($entry)) {
+              continue;
+          }
+
+          $heading = $normalizeString($entry['heading'] ?? null, '');
+          $body = $normalizeList($entry['body'] ?? null, []);
+
+          if ($heading === '' || $body === []) {
+              continue;
+          }
+
+          $record = [
+              'heading' => $heading,
+              'body' => $body,
+          ];
+
+          if ($withQuote) {
+              $quoteText = $normalizeString($entry['quote_text'] ?? ($entry['quote']['text'] ?? null), '');
+              if ($quoteText !== '') {
+                  $record['quote'] = [
+                      'text' => $quoteText,
+                      'author' => $normalizeString($entry['quote_author'] ?? ($entry['quote']['author'] ?? null), ''),
+                  ];
+              }
+          }
+
+          $result[] = $record;
+      }
+
+      return $result;
+  };
+
+  $founderSections = $mapStorySections($s->founder_sections ?? null, true);
+  $founderExtraSections = $mapStorySections($s->founder_extra_sections ?? null, false);
+
+  $founderSocials = array_filter([
+      'linkedin' => $normalizeOptionalUrl($s->founder_linkedin ?? null),
+      'instagram'=> $normalizeOptionalUrl($s->founder_instagram ?? null),
+      'site'     => $normalizeOptionalUrl($s->founder_site ?? null),
+  ]);
+
+  $founderProps = [
+      'badge'    => $normalizeString($s->founder_badge ?? null, 'Історія засновника'),
+      'subtitle' => $normalizeString($s->founder_intro ?? null, ''),
+      'founder'  => [
+          'name'   => $normalizeString($s->founder_name ?? null, 'Олена Коваль'),
+          'role'   => $normalizeString($s->founder_role ?? null, 'Засновниця школи англійської'),
+          'photo'  => [
+              'src' => $founderPhotoUrl,
+              'alt' => $normalizeString($s->founder_photo_alt ?? null, $normalizeString($s->founder_name ?? null, 'Олена Коваль')),
+          ],
+          'socials' => $founderSocials,
+      ],
+      'content' => $founderSections,
+      'extra'   => $founderExtraSections,
   ];
 
-  $storyContent = [
-    [
-      'heading' => 'Початок шляху',
-      'body'    => [
-        'Усе почалося з індивідуальних занять удома: один стіл, ноутбук та велике бажання допомогти студентам заговорити впевнено.',
-        'Поступово сформувалася методика, що поєднує комунікативний підхід та завдання з реальних ситуацій.',
-      ],
-      'milestones' => [
-        ['year' => '2015', 'text' => 'Перші 10 учнів і відгуки, що надихнули рухатися далі.'],
-        ['year' => '2016', 'text' => 'Перші групи вихідного дня: розмовні клуби та міні-проєкти.'],
-      ],
-    ],
-    [
-      'heading' => 'Розвиток і помилки',
-      'body'    => [
-        'Зростання — це експерименти. Частину форматів ми відкинули, залишивши тільки ті, що реально працюють.',
-        'Фокус — на практиці й результаті: тестові розмови, мікроцілі та підсумки після кожного модуля.',
-      ],
-      'quote' => ['text' => 'Мова — інструмент. Коли ним користуєшся щодня, він залишається гострим.', 'author' => 'Олена'],
-    ],
-    [
-      'heading' => 'Сьогодні',
-      'body'    => [
-        'Ми зібрали найкращий досвід у структуровані програми та оновлюємо матеріали щосеместру.',
-        'Мета — дати інструменти й впевненість, щоб англійська працювала у реальному житті.',
-      ],
-    ],
-  ];
+  if ($founderProps['subtitle'] === '') {
+      $founderProps['subtitle'] = null;
+  }
 @endphp
 
 {{-- бажано прелоадити фото засновника як LCP/near-LCP, якщо поруч герой-блок --}}
@@ -149,7 +207,7 @@
 <div
   id="founder"
   data-vue="FounderStory"
-  data-props='@json(["founder"=>$founder,"content"=>$storyContent], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
+  data-props='@json($founderProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
   {{-- за бажанням: server-skeleton тут --}}
 </div>
 {{-- === LESSONS (Vue) === --}}
@@ -332,13 +390,62 @@
   data-props='@json($advantagesProps, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
 </div>
 @php
+  $reviewsRaw = is_array($s->reviews_items ?? null) ? $s->reviews_items : [];
+  $reviewsList = [];
+  foreach ($reviewsRaw as $entry) {
+      if (! is_array($entry)) {
+          continue;
+      }
+
+      $name = $normalizeString($entry['name'] ?? null, '');
+      $text = $normalizeString($entry['text'] ?? null, '');
+
+      if ($name === '' || $text === '') {
+          continue;
+      }
+
+      $course = $normalizeString($entry['course'] ?? null, '');
+      $stars = $entry['stars'] ?? 5;
+      $stars = is_numeric($stars) ? max(0, min(5, (int) $stars)) : 5;
+
+      $avatarPath = $entry['avatar_path'] ?? null;
+      $avatarUrl = $normalizeOptionalUrl($entry['avatar_url'] ?? null);
+
+      $avatar = null;
+      if (is_string($avatarPath) && $avatarPath !== '') {
+          if (\Illuminate\Support\Str::startsWith($avatarPath, ['http://', 'https://', '/'])) {
+              $avatar = $avatarPath;
+          } else {
+              $avatar = \Illuminate\Support\Facades\Storage::disk('public')->url($avatarPath);
+          }
+      }
+
+      if (! $avatar) {
+          $avatar = $avatarUrl ?: 'https://i.pravatar.cc/96?img=15';
+      }
+
+      $reviewsList[] = [
+          'name' => $name,
+          'text' => $text,
+          'course' => $course !== '' ? $course : null,
+          'stars' => $stars,
+          'avatar' => $avatar,
+      ];
+  }
+
+  $fallbackReviews = [
+      ["name"=>"Марія Коваль","avatar"=>"https://i.pravatar.cc/96?img=1","stars"=>5,"course"=>"IELTS","text"=>'Класні уроки, багато розмовної практики і чіткий план підготовки. За місяць стала впевненіше говорити, рекомендую!'],
+      ["name"=>"Олег С.","avatar"=>"https://i.pravatar.cc/96?img=2","stars"=>5,"course"=>"Business English","text"=>'Сучасні завдання, реальні кейси з роботи. Дуже подобається формат — завжди тримає фокус і дає результат.'],
+      ["name"=>"Ірина Ч.","avatar"=>"https://i.pravatar.cc/96?img=3","stars"=>5,"course"=>"General","text"=>'Дуже комфортно й ефективно. Індивідуальний підхід, помітний прогрес вже за кілька тижнів.'],
+      ["name"=>"Андрій П.","avatar"=>"https://i.pravatar.cc/96?img=4","stars"=>5,"course"=>"Speaking Club","text"=>'Динамічні зустрічі, багато говоріння, виправлення помилок у реальному часі — супер!'],
+  ];
+
   $reviewsProps = [
-    'reviews' => [
-      ["name"=>"Марія Коваль","avatar"=>"https://i.pravatar.cc/96?img=1","stars"=>5,"course"=>"IELTS","text"=>"..."],
-      ["name"=>"Олег С.","avatar"=>"https://i.pravatar.cc/96?img=2","stars"=>5,"course"=>"Business English","text"=>"..."],
-      ["name"=>"Ірина","avatar"=>"https://i.pravatar.cc/96?img=3","stars"=>5,"course"=>"General","text"=>"..."],
-      ["name"=>"Андрій","avatar"=>"https://i.pravatar.cc/96?img=4","stars"=>5,"course"=>"Speaking","text"=>"..."],
-    ],
+      'badge' => $normalizeString($s->reviews_badge ?? null, 'Наші відгуки'),
+      'title' => $normalizeString($s->reviews_title ?? null, 'Нам довіряють — результати студентів це наша перевага'),
+      'buttonText' => $normalizeString($s->reviews_button_text ?? null, 'Більше відгуків в Instagram'),
+      'buttonUrl' => $normalizeUrl($s->reviews_button_url ?? null, 'https://instagram.com/your.profile'),
+      'reviews' => $reviewsList !== [] ? $reviewsList : $fallbackReviews,
   ];
 @endphp
 

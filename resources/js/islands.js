@@ -11,7 +11,7 @@ import ValuesSection from './components/ValuesSection.vue'
 import PricingCards from './components/PricingCards.vue'
 import FaqSection from './components/FaqSection.vue'
 // ⬇️ НОВЕ
-import FeatureClubsSection from './components/FeatureClubsSection.vue'
+
 import AdvantagesSplit from './components/AdvantagesSplit.vue'
 import ReviewsMarquee from './components/ReviewsMarquee.vue'
 import TeacherVacancy from './components/TeacherVacancy.vue'
@@ -44,8 +44,8 @@ const registry = {
   
   
 
-  // ⬇️ НОВЕ
-  FeatureClubsSection: markRaw(FeatureClubsSection),
+  
+ 
 }
 
 function parseProps(el) {

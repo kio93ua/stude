@@ -22,6 +22,57 @@ class HomePageSettings extends Settings
     // шлях у public/storage/homepage/....
     public ?string $hero_image_path = null;
 
+    public string $founder_badge = 'Історія засновника';
+    public string $founder_name = 'Олена Коваль';
+    public string $founder_role = 'Засновниця школи англійської';
+    public ?string $founder_intro = 'Від першого учня до власної школи: шлях, помилки і відкриття, які сформували наш підхід до навчання.';
+    public ?string $founder_photo_path = 'images/founder.png';
+    public string $founder_photo_alt = 'Портрет засновниці';
+    public ?string $founder_linkedin = 'https://www.linkedin.com/';
+    public ?string $founder_instagram = 'https://www.instagram.com/';
+    public ?string $founder_site = 'https://example.com';
+    public array $founder_sections = [
+        [
+            'heading' => 'Початок шляху',
+            'body' => [
+                'Усе почалося з індивідуальних занять удома: один стіл, ноутбук та велике бажання допомогти студентам заговорити впевнено.',
+                'Поступово сформувалася методика, що поєднує комунікативний підхід та завдання з реальних ситуацій.',
+            ],
+        ],
+        [
+            'heading' => 'Розвиток і помилки',
+            'body' => [
+                'Зростання — це експерименти. Частину форматів ми відкинули, залишивши тільки ті, що реально працюють.',
+                'Фокус — на практиці й результаті: тестові розмови, мікроцілі та підсумки після кожного модуля.',
+            ],
+            'quote_text' => 'Мова — інструмент. Коли ним користуєшся щодня, він залишається гострим.',
+            'quote_author' => 'Олена',
+        ],
+        [
+            'heading' => 'Сьогодні',
+            'body' => [
+                'Ми зібрали найкращий досвід у структуровані програми та продовжуємо оновлювати матеріали щосеместру.',
+                'Мета — дати інструменти і впевненість, щоб англійська працювала у реальному житті.',
+            ],
+        ],
+    ];
+    public array $founder_extra_sections = [
+        [
+            'heading' => 'Як з’явилася методика',
+            'body' => [
+                'Ми пробували різні формати — від класичних підручників до ситуативних рольових ігор. Залишили те, що реально працює для дорослих і підлітків: короткі міні-цілі, регулярні спікінг-сесії, фокус на лексичних блоках і практиці зі сценаріями з життя.',
+                'Кожен модуль завершується підсумковими розмовами і мікро-рефлексією: що вже виходить, де є бар’єр, і як його зняти. Так все поступово перетворюється на стабільну звичку говорити.',
+            ],
+        ],
+        [
+            'heading' => 'Сьогодні та далі',
+            'body' => [
+                'Системно оновлюємо програми кожен семестр: додаємо сучасні теми, короткі відео, завдання на слух і говоріння та адаптуємо матеріали під реальні задачі студентів — робота, подорожі, навчання, переїзд.',
+                'Наша мета — зробити англійську корисним інструментом на щодень. Ви отримуєте зрозумілий план, підтримку викладача і прозорі критерії прогресу без зайвої “води”.',
+            ],
+        ],
+    ];
+
     public string $pricing_badge = 'Пакети занять';
     public string $pricing_title = 'Обери формат, що пасує саме тобі';
     public string $pricing_subtitle = 'Три прозорі варіанти з чіткими перевагами.';
@@ -116,6 +167,45 @@ class HomePageSettings extends Settings
         ['id' => 'kXYiU_JCYtU', 'title' => 'Фразові дієслова', 'description' => 'Корисні конструкції для реальних ситуацій.'],
     ];
 
+    public string $reviews_badge = 'Наші відгуки';
+    public string $reviews_title = 'Нам довіряють — результати студентів це наша перевага';
+    public string $reviews_button_text = 'Більше відгуків в Instagram';
+    public string $reviews_button_url = 'https://instagram.com/your.profile';
+    public array $reviews_items = [
+        [
+            'name' => 'Марія Коваль',
+            'avatar_path' => null,
+            'avatar_url' => 'https://i.pravatar.cc/96?img=1',
+            'stars' => 5,
+            'course' => 'IELTS',
+            'text' => 'Класні уроки, багато розмовної практики і чіткий план підготовки. За місяць стала впевненіше говорити, рекомендую!',
+        ],
+        [
+            'name' => 'Олег С.',
+            'avatar_path' => null,
+            'avatar_url' => 'https://i.pravatar.cc/96?img=2',
+            'stars' => 5,
+            'course' => 'Business English',
+            'text' => 'Сучасні завдання, реальні кейси з роботи. Дуже подобається формат — завжди тримає фокус і дає результат.',
+        ],
+        [
+            'name' => 'Ірина Ч.',
+            'avatar_path' => null,
+            'avatar_url' => 'https://i.pravatar.cc/96?img=3',
+            'stars' => 5,
+            'course' => 'General',
+            'text' => 'Дуже комфортно й ефективно. Індивідуальний підхід, помітний прогрес вже за кілька тижнів.',
+        ],
+        [
+            'name' => 'Андрій П.',
+            'avatar_path' => null,
+            'avatar_url' => 'https://i.pravatar.cc/96?img=4',
+            'stars' => 5,
+            'course' => 'Speaking Club',
+            'text' => 'Динамічні зустрічі, багато говоріння, виправлення помилок у реальному часі — супер!',
+        ],
+    ];
+
     public string $faq_title = 'FAQ (коротко)';
     public ?string $faq_subtitle = '';
 
@@ -145,7 +235,24 @@ class HomePageSettings extends Settings
             'a' => 'Так. Доступ до власних конспектів, карток і відео в LMS.',
         ],
     ];
+// --- Teacher Vacancy (керується з адмінки) ---
+public string  $vacancy_badge    = 'Вакансія';
+public string  $vacancy_title    = 'Запрошуємо вчителів англійської';
+public ?string $vacancy_subtitle = 'Гнучкий графік, сучасні матеріали та дружня команда. Розвивайся разом із нами й впливай на результати студентів.';
+public array   $vacancy_bullets  = [
+    'Гнучкий графік: обирайте слоти під себе',
+    'Матеріали, планування та тім-саппорт (перевірка, клуби)',
+    'Прозора оплата та бонуси за результати студентів',
+];
 
+// Один із варіантів для зображення: локальний файл у public/storage/...
+public ?string $vacancy_media_path = null;
+// або прямий зовнішній URL (якщо path не заданий)
+public ?string $vacancy_media_url  = null;
+
+// Кнопка
+public string  $vacancy_cta_text = 'Заповнити анкету';
+public string  $vacancy_cta_url  = 'https://docs.google.com/forms/d/e/1FAIpQLSew8oe-A0p3wS7omGT_u3h9ts04egW_Mr0SfIgYzXn8tQUekA/viewform?usp=header';
     public static function group(): string
     {
         return 'home';

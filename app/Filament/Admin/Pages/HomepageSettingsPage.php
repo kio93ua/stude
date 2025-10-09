@@ -28,8 +28,12 @@ class HomepageSettingsPage extends SettingsPage
 
     /** Поточний (старий) шлях до hero-зображення до сабміту форми */
     protected ?string $oldHeroImagePath = null;
+    protected ?string $oldFounderPhotoPath = null;
     protected array $oldAdvantageImages = [];
     protected array $oldAdvantageIcons = [];
+    protected array $oldReviewAvatars = [];
+    protected ?string $oldVacancyMediaPath = null;
+
 
     public function mount(): void
     {
@@ -37,8 +41,19 @@ class HomepageSettingsPage extends SettingsPage
         // зчитуємо поточне значення перед редагуванням, щоб мати що видалити після апдейту
         $settings = app(HomePageSettings::class);
         $this->oldHeroImagePath = $settings->hero_image_path ?: null;
+        $photoPath = $settings->founder_photo_path ?: null;
+        $this->oldFounderPhotoPath = is_string($photoPath) && ! Str::startsWith($photoPath, ['http://', 'https://'])
+            ? $photoPath
+            : null;
         $this->oldAdvantageImages = collect($settings->advantages_items ?? [])->pluck('image_path')->filter()->values()->all();
         $this->oldAdvantageIcons = collect($settings->advantages_items ?? [])->pluck('icons')->flatten()->filter()->values()->all();
+        $this->oldReviewAvatars = collect($settings->reviews_items ?? [])
+            ->pluck('avatar_path')
+            ->filter(fn ($path) => is_string($path) && $path !== '' && ! Str::startsWith($path, ['http://', 'https://', '/']))
+            ->values()
+            ->all();
+            $this->oldVacancyMediaPath = app(\App\Settings\HomePageSettings::class)->vacancy_media_path ?: null;
+
     }
 
     protected function getFormSchema(): array
@@ -156,6 +171,118 @@ class HomepageSettingsPage extends SettingsPage
                     Forms\Components\Fieldset::make('Картка: Індивідуальні')
                         ->schema($this->pricingCardSchema('pricing_plans.individual'))
                         ->columns(2)
+                        ->columnSpanFull(),
+                ]),
+
+            Forms\Components\Section::make('Історія засновника')
+                ->columns(2)
+                ->schema([
+                    TextInput::make('founder_badge')
+                        ->label('Бейдж')
+                        ->required()
+                        ->maxLength(80),
+
+                    TextInput::make('founder_name')
+                        ->label('Ім’я')
+                        ->required(),
+
+                    TextInput::make('founder_role')
+                        ->label('Роль / титул')
+                        ->required(),
+
+                    Textarea::make('founder_intro')
+                        ->label('Підзаголовок під ім’ям')
+                        ->rows(3)
+                        ->columnSpanFull(),
+
+                    FileUpload::make('founder_photo_path')
+                        ->label('Фото засновника')
+                        ->image()
+                        ->directory('founder')
+                        ->disk('public')
+                        ->visibility('public')
+                        ->imageEditor()
+                        ->imagePreviewHeight('220')
+                        ->maxSize(8192)
+                        ->acceptedFileTypes(['image/jpeg','image/png','image/webp','image/gif'])
+                        ->columnSpanFull(),
+
+                    TextInput::make('founder_photo_alt')
+                        ->label('ALT для фото')
+                        ->maxLength(120)
+                        ->columnSpanFull(),
+
+                    TextInput::make('founder_linkedin')
+                        ->label('LinkedIn')
+                        ->nullable(),
+
+                    TextInput::make('founder_instagram')
+                        ->label('Instagram')
+                        ->nullable(),
+
+                    TextInput::make('founder_site')
+                        ->label('Персональний сайт')
+                        ->nullable(),
+
+                    Repeater::make('founder_sections')
+                        ->label('Основні секції історії')
+                        ->schema([
+                            TextInput::make('heading')
+                                ->label('Заголовок')
+                                ->required(),
+
+                            Repeater::make('body')
+                                ->label('Абзаци')
+                                ->schema([
+                                    Textarea::make('value')
+                                        ->label('Текст')
+                                        ->rows(2)
+                                        ->required(),
+                                ])
+                                ->minItems(1)
+                                ->defaultItems(1) 
+                                ->addActionLabel('Додати абзац')
+                                ->columnSpanFull()
+                                ->dehydrateStateUsing(fn ($state) => $this->normalizeParagraphRepeater($state)),
+
+                            Textarea::make('quote_text')
+                                ->label('Цитата (опційно)')
+                                ->rows(2)
+                                ->columnSpanFull(),
+
+                            TextInput::make('quote_author')
+                                ->label('Автор цитати')
+                                ->maxLength(120),
+                        ])
+                        ->minItems(1)
+                        ->addActionLabel('Додати секцію')
+                        ->reorderable()
+                        ->columnSpanFull(),
+
+                    Repeater::make('founder_extra_sections')
+                        ->label('Додаткові розділи')
+                        ->schema([
+                            TextInput::make('heading')
+                                ->label('Заголовок')
+                                ->required(),
+
+                            Repeater::make('body')
+                                ->label('Абзаци')
+                                ->schema([
+                                    Textarea::make('value')
+                                        ->label('Текст')
+                                        ->rows(2)
+                                        ->required(),
+                                ])
+                                ->minItems(0)           
+                                 ->defaultItems(0) 
+                                ->columnSpanFull()
+                                ->dehydrateStateUsing(fn ($state) => $this->normalizeParagraphRepeater($state)),
+                        ])
+                        ->addActionLabel('Додати розділ')
+                        ->reorderable()
+                        ->minItems(0)
+                        ->maxItems(5)
                         ->columnSpanFull(),
                 ]),
 
@@ -285,7 +412,7 @@ class HomepageSettingsPage extends SettingsPage
                         ->addActionLabel('Додати питання')
                         ->reorderable()
                         ->defaultItems(6)
-                        ->minItems(3)
+                        ->minItems(1)
                         ->maxItems(12)
                         ->columnSpanFull(),
                 ]),
@@ -337,7 +464,129 @@ class HomepageSettingsPage extends SettingsPage
                         ->maxItems(8)
                         ->columnSpanFull(),
                 ]),
+             Forms\Components\Section::make('Вакансія (TeacherVacancy)')
+    ->columns(2)
+    ->schema([
+        TextInput::make('vacancy_badge')->label('Бейдж')->required()->maxLength(60),
+        TextInput::make('vacancy_title')->label('Заголовок')->required()->columnSpanFull(),
+        Textarea::make('vacancy_subtitle')->label('Підзаголовок')->rows(2)->columnSpanFull(),
+
+        TagsInput::make('vacancy_bullets')
+            ->label('Пункти списку')
+            ->separator(',')
+            ->reorderable()
+            ->afterStateHydrated(function ($set, $state) {
+                if (is_string($state)) $set('vacancy_bullets', preg_split('/\s*,\s*/', $state, -1, PREG_SPLIT_NO_EMPTY));
+                elseif (!is_array($state)) $set('vacancy_bullets', []);
+            })
+            ->dehydrateStateUsing(fn($state) => $this->normalizeStringArray($state))
+            ->columnSpanFull(),
+
+        // зображення (локальний upload)
+        FileUpload::make('vacancy_media_path')
+            ->label('Зображення (локально)')
+            ->image()
+            ->directory('vacancy')
+            ->disk('public')
+            ->visibility('public')
+            ->imageEditor()
+            ->imagePreviewHeight('200')
+            ->maxSize(8192)
+            ->acceptedFileTypes(['image/jpeg','image/png','image/webp','image/gif'])
+            ->columnSpanFull(),
+
+        // альтернативно, прямий URL
+        TextInput::make('vacancy_media_url')
+            ->label('Зображення (URL)')
+            ->helperText('Якщо заповнено, має пріоритет над локальним файлом.')
+            ->maxLength(255)
+            ->columnSpanFull(),
+
+        TextInput::make('vacancy_cta_text')->label('Текст кнопки')->required(),
+        TextInput::make('vacancy_cta_url')->label('Посилання кнопки')->required()->maxLength(255),
+    ]),
+
+            Forms\Components\Section::make('Відгуки (Reviews)')
+                ->columns(2)
+                ->schema([
+                    TextInput::make('reviews_badge')
+                        ->label('Бейдж')
+                        ->required()
+                        ->maxLength(80),
+
+                    TextInput::make('reviews_title')
+                        ->label('Заголовок')
+                        ->required()
+                        ->columnSpanFull(),
+
+                    TextInput::make('reviews_button_text')
+                        ->label('Текст кнопки')
+                        ->required()
+                        ->maxLength(120),
+
+                    TextInput::make('reviews_button_url')
+                        ->label('Посилання кнопки')
+                        ->required()
+                        ->maxLength(255),
+
+                    Repeater::make('reviews_items')
+                        ->label('Відгуки')
+                        ->schema([
+                            TextInput::make('name')
+                                ->label("Ім'я")
+                                ->required(),
+
+                            TextInput::make('course')
+                                ->label('Курс / контекст')
+                                ->maxLength(80),
+
+                            TextInput::make('stars')
+                                ->label('Зірок (0-5)')
+                                ->numeric()
+                                ->minValue(0)
+                                ->maxValue(5)
+                                ->default(5)
+                                ->columnSpan(1),
+
+                            Textarea::make('text')
+                                ->label('Текст відгуку')
+                                ->rows(3)
+                                ->required()
+                                ->columnSpanFull(),
+
+                            FileUpload::make('avatar_path')
+                                ->label('Аватар (завантажити)')
+                                ->image()
+                                ->directory('reviews/avatars')
+                                ->disk('public')
+                                ->visibility('public')
+                                ->imageEditor()
+                                ->imagePreviewHeight('96')
+                                ->maxSize(4096)
+                                ->acceptedFileTypes(['image/jpeg','image/png','image/webp','image/gif'])
+                                ->columnSpan(1),
+
+                            TextInput::make('avatar_url')
+                                ->label('Аватар (URL, якщо без завантаження)')
+                                ->maxLength(255)
+                                ->columnSpan(1),
+                        ])
+                        ->addActionLabel('Додати відгук')
+                        ->reorderable()
+                        ->minItems(1)
+                        ->maxItems(12)
+                        ->columnSpanFull(),
+                ]),
         ];
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['founder_sections'] = $this->prepareSectionsForForm($data['founder_sections'] ?? [], true);
+        $data['founder_extra_sections'] = $this->prepareSectionsForForm($data['founder_extra_sections'] ?? [], false);
+        $data['reviews_items'] = $this->prepareReviewsForForm($data['reviews_items'] ?? []);
+
+        return $data;
     }
 
     /**
@@ -355,6 +604,17 @@ class HomepageSettingsPage extends SettingsPage
             'hero_secondary_text'  => null,
             'hero_secondary_href'  => null,
             'hero_image_path'      => null,
+            'founder_badge'        => '',
+            'founder_name'         => '',
+            'founder_role'         => '',
+            'founder_intro'        => null,
+            'founder_photo_path'   => null,
+            'founder_photo_alt'    => '',
+            'founder_linkedin'     => null,
+            'founder_instagram'    => null,
+            'founder_site'         => null,
+            'founder_sections'     => [],
+            'founder_extra_sections' => [],
             'pricing_badge'        => '',
             'pricing_title'        => '',
             'pricing_subtitle'     => '',
@@ -374,6 +634,11 @@ class HomepageSettingsPage extends SettingsPage
             'lessons_subtitle'     => '',
             'lessons_autoplay_on_view' => false,
             'lessons_videos'       => [],
+            'reviews_badge'        => '',
+            'reviews_title'        => '',
+            'reviews_button_text'  => '',
+            'reviews_button_url'   => '',
+            'reviews_items'        => [],
         ];
 
         // TagsInput вже повертає масив рядків — лише прибираємо порожнє
@@ -411,6 +676,39 @@ class HomepageSettingsPage extends SettingsPage
         }
         $data['pricing_plans'] = $normalizedPlans;
 
+        $data['founder_badge'] = $this->sanitizeString($data['founder_badge'] ?? '');
+        $data['founder_name'] = $this->sanitizeString($data['founder_name'] ?? '');
+        $data['founder_role'] = $this->sanitizeString($data['founder_role'] ?? '');
+        $data['founder_intro'] = $this->sanitizeNullableString($data['founder_intro'] ?? null);
+        $data['founder_photo_alt'] = $this->sanitizeString($data['founder_photo_alt'] ?? '');
+        $data['founder_linkedin'] = $this->sanitizeNullableUrl($data['founder_linkedin'] ?? null);
+        $data['founder_instagram'] = $this->sanitizeNullableUrl($data['founder_instagram'] ?? null);
+        $data['founder_site'] = $this->sanitizeNullableUrl($data['founder_site'] ?? null);
+        $data['founder_sections'] = $this->normalizeFounderSections($data['founder_sections'] ?? []);
+        $data['founder_extra_sections'] = $this->normalizeFounderExtras($data['founder_extra_sections'] ?? []);
+
+        if (array_key_exists('founder_photo_path', $data)) {
+            $newPhotoPath = is_string($data['founder_photo_path']) ? trim($data['founder_photo_path']) : null;
+
+            if ($newPhotoPath) {
+                $optimized = $this->optimizeAndReplacePublicImage($newPhotoPath, directory: 'founder', maxBytes: 3 * 1024 * 1024);
+
+                if ($optimized) {
+                    if ($this->oldFounderPhotoPath && $this->oldFounderPhotoPath !== $optimized) {
+                        Storage::disk('public')->delete($this->sanitizeRelative($this->oldFounderPhotoPath));
+                    }
+                    $data['founder_photo_path'] = $optimized;
+                    $this->oldFounderPhotoPath = $optimized;
+                }
+            } else {
+                if ($this->oldFounderPhotoPath) {
+                    Storage::disk('public')->delete($this->sanitizeRelative($this->oldFounderPhotoPath));
+                }
+                $data['founder_photo_path'] = null;
+                $this->oldFounderPhotoPath = null;
+            }
+        }
+
         $data['advantages_badge'] = $this->sanitizeString($data['advantages_badge'] ?? '');
         $data['advantages_title'] = $this->sanitizeString($data['advantages_title'] ?? '');
         $data['advantages_subtitle'] = $this->sanitizeNullableString($data['advantages_subtitle'] ?? null);
@@ -427,6 +725,40 @@ class HomepageSettingsPage extends SettingsPage
         $data['lessons_subtitle'] = $this->sanitizeNullableString($data['lessons_subtitle'] ?? null);
         $data['lessons_autoplay_on_view'] = filter_var($data['lessons_autoplay_on_view'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $data['lessons_videos'] = $this->normalizeLessonsVideos($data['lessons_videos'] ?? []);
+        $data['vacancy_badge']    = $this->sanitizeString($data['vacancy_badge'] ?? '');
+$data['vacancy_title']    = $this->sanitizeString($data['vacancy_title'] ?? '');
+$data['vacancy_subtitle'] = $this->sanitizeNullableString($data['vacancy_subtitle'] ?? null);
+$data['vacancy_bullets']  = $this->normalizeStringArray($data['vacancy_bullets'] ?? []);
+$data['vacancy_cta_text'] = $this->sanitizeString($data['vacancy_cta_text'] ?? '');
+$data['vacancy_cta_url']  = $this->sanitizeUrl($data['vacancy_cta_url'] ?? '');
+
+$data['vacancy_media_url'] = $this->sanitizeNullableUrl($data['vacancy_media_url'] ?? null);
+
+// локальне зображення → оптимізуємо до webp
+if (array_key_exists('vacancy_media_path', $data)) {
+    $new = is_string($data['vacancy_media_path']) ? trim($data['vacancy_media_path']) : null;
+    if ($new) {
+        $optimized = $this->optimizeAndReplacePublicImage($new, directory: 'vacancy', maxBytes: 3 * 1024 * 1024);
+        if ($optimized) {
+            if ($this->oldVacancyMediaPath && $this->oldVacancyMediaPath !== $optimized) {
+                \Storage::disk('public')->delete($this->sanitizeRelative($this->oldVacancyMediaPath));
+            }
+            $data['vacancy_media_path'] = $optimized;
+            $this->oldVacancyMediaPath = $optimized;
+        }
+    } else {
+        if ($this->oldVacancyMediaPath) {
+            \Storage::disk('public')->delete($this->sanitizeRelative($this->oldVacancyMediaPath));
+        }
+        $data['vacancy_media_path'] = null;
+        $this->oldVacancyMediaPath = null;
+    }
+}
+        $data['reviews_badge'] = $this->sanitizeString($data['reviews_badge'] ?? '');
+        $data['reviews_title'] = $this->sanitizeString($data['reviews_title'] ?? '');
+        $data['reviews_button_text'] = $this->sanitizeString($data['reviews_button_text'] ?? '');
+        $data['reviews_button_url'] = $this->sanitizeUrl($data['reviews_button_url'] ?? 'https://instagram.com/your.profile');
+        $data['reviews_items'] = $this->normalizeReviewItems($data['reviews_items'] ?? []);
 
         // 🖼️ якщо у формі є новий шлях — оптимізуємо і підміняємо на .webp, старий видаляємо
         if (array_key_exists('hero_image_path', $data)) {
@@ -558,6 +890,12 @@ class HomepageSettingsPage extends SettingsPage
         return $url !== '' ? $url : '#contact';
     }
 
+    protected function sanitizeNullableUrl(mixed $value): ?string
+    {
+        $url = trim((string) ($value ?? ''));
+        return $url !== '' ? $url : null;
+    }
+
     /**
      * @return array<int, array{q: string, a: string}>
      */
@@ -592,6 +930,198 @@ class HomepageSettingsPage extends SettingsPage
         }
 
         return $normalized;
+    }
+
+    /**
+     * @return array<int, array{
+     *     heading: string,
+     *     body: array<int, string>,
+     *     quote?: array{text: string, author: string},
+     * }>
+     */
+    protected function normalizeFounderSections(mixed $sections): array
+    {
+        $defaults = app(HomePageSettings::class)->founder_sections;
+
+        if (! is_array($sections)) {
+            return $defaults;
+        }
+
+        $normalized = [];
+
+        foreach ($sections as $section) {
+            if (! is_array($section)) {
+                continue;
+            }
+
+            $heading = $this->sanitizeString($section['heading'] ?? '');
+            $body = $this->normalizeParagraphRepeater($section['body'] ?? []);
+
+            if ($heading === '' || $body === []) {
+                continue;
+            }
+
+            $record = [
+                'heading' => $heading,
+                'body' => $body,
+            ];
+
+            $quoteText = $this->sanitizeString($section['quote_text'] ?? ($section['quote']['text'] ?? ''));
+            $quoteAuthor = $this->sanitizeString($section['quote_author'] ?? ($section['quote']['author'] ?? ''));
+
+            if ($quoteText !== '') {
+                $record['quote_text'] = $quoteText;
+                $record['quote_author'] = $quoteAuthor;
+            }
+
+            $normalized[] = $record;
+        }
+
+        return $normalized !== [] ? $normalized : $defaults;
+    }
+
+    /**
+     * @return array<int, array{heading: string, body: array<int, string>}>
+     */
+   protected function normalizeFounderExtras(mixed $sections): array
+{
+    if (! is_array($sections)) {
+        return []; // дозволяємо відсутність додаткових розділів
+    }
+
+    $normalized = [];
+    foreach ($sections as $section) {
+        if (! is_array($section)) {
+            continue;
+        }
+
+        $heading = $this->sanitizeString($section['heading'] ?? '');
+        $body    = $this->normalizeParagraphRepeater($section['body'] ?? []);
+
+        if ($heading === '' || $body === []) {
+            continue;
+        }
+
+        $normalized[] = [
+            'heading' => $heading,
+            'body'    => $body,
+        ];
+    }
+
+    return $normalized; // ніяких дефолтів, якщо користувач нічого не додав
+}
+
+
+    /**
+     * @return array<int, string>
+     */
+   protected function normalizeParagraphRepeater(mixed $value): array
+{
+    if (! is_array($value)) {
+        return [];
+    }
+
+    $paragraphs = [];
+
+    foreach ($value as $item) {
+        if (is_array($item) && array_key_exists('value', $item)) {
+            $text = $this->sanitizeString($item['value']);
+        } elseif (is_array($item) && array_key_exists('text', $item)) {
+            $text = $this->sanitizeString($item['text']);
+        } else {
+            $text = $this->sanitizeString($item);
+        }
+
+        if ($text !== '') {
+            $paragraphs[] = $text;
+        }
+    }
+
+    // ❗ нове: прибираємо повні дублікати
+    $paragraphs = array_values(array_unique($paragraphs));
+
+    return $paragraphs;
+}
+
+
+    protected function prepareSectionsForForm(mixed $sections, bool $withQuote): array
+    {
+        if (! is_array($sections)) {
+            return [];
+        }
+
+        $prepared = [];
+
+        foreach ($sections as $section) {
+            if (! is_array($section)) {
+                continue;
+            }
+
+            $heading = $this->sanitizeString($section['heading'] ?? '');
+            $body = $this->prepareParagraphItems($section['body'] ?? []);
+
+            $record = [
+                'heading' => $heading,
+                'body' => $body,
+            ];
+
+            if ($withQuote) {
+                $record['quote_text'] = $this->sanitizeString($section['quote_text'] ?? ($section['quote']['text'] ?? ''));
+                $record['quote_author'] = $this->sanitizeString($section['quote_author'] ?? ($section['quote']['author'] ?? ''));
+            }
+
+            $prepared[] = $record;
+        }
+
+        return $prepared;
+    }
+
+    protected function prepareParagraphItems(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        return array_map(function ($item) {
+            if (is_array($item) && array_key_exists('value', $item)) {
+                return ['value' => $this->sanitizeString($item['value'])];
+            }
+
+            if (is_string($item)) {
+                return ['value' => $this->sanitizeString($item)];
+            }
+
+            return ['value' => ''];
+        }, array_values($value));
+    }
+
+    protected function prepareReviewsForForm(mixed $items): array
+    {
+        if (! is_array($items)) {
+            return [];
+        }
+
+        return array_map(function ($item) {
+            $name = $this->sanitizeString($item['name'] ?? '');
+            $course = $this->sanitizeString($item['course'] ?? '');
+            $text = $this->sanitizeString($item['text'] ?? '');
+            $stars = isset($item['stars']) ? (int) $item['stars'] : 5;
+
+            $path = $item['avatar_path'] ?? null;
+            $urlCandidate = $item['avatar_url'] ?? null;
+
+            $avatarPath = (is_string($path) && $path !== '' && ! Str::startsWith($path, ['http://', 'https://', '/'])) ? $path : null;
+            $avatarUrl = $avatarPath ? null : $this->sanitizeNullableUrl($urlCandidate ?? $path ?? null);
+
+            return [
+                'name' => $name,
+                'course' => $course,
+                'text' => $text,
+                'stars' => $stars,
+                'avatar_path' => $avatarPath,
+                'avatar_url' => $avatarUrl,
+            ];
+        }, array_values($items));
     }
 
     /**
@@ -711,6 +1241,82 @@ class HomepageSettingsPage extends SettingsPage
         return $normalized !== [] ? $normalized : $defaults;
     }
 
+    /**
+     * @return array<int, array{
+     *     name: string,
+     *     text: string,
+     *     course: ?string,
+     *     stars: int,
+     *     avatar_path: ?string,
+     *     avatar_url: ?string,
+     * }>
+     */
+    protected function normalizeReviewItems(mixed $items): array
+    {
+        $defaults = app(HomePageSettings::class)->reviews_items;
+
+        if (! is_array($items)) {
+            return $defaults;
+        }
+
+        $normalized = [];
+        $newAvatars = [];
+
+        foreach ($items as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+
+            $name = $this->sanitizeString($item['name'] ?? '');
+            $text = $this->sanitizeString($item['text'] ?? '');
+
+            if ($name === '' || $text === '') {
+                continue;
+            }
+
+            $course = $this->sanitizeString($item['course'] ?? '');
+            $starsRaw = $item['stars'] ?? null;
+            $stars = is_numeric($starsRaw) ? max(0, min(5, (int) $starsRaw)) : 5;
+
+            $avatarPath = null;
+            $avatarUrl = $this->sanitizeNullableUrl($item['avatar_url'] ?? null);
+
+            $pathCandidate = is_string($item['avatar_path'] ?? null) ? trim($item['avatar_path']) : '';
+            if ($pathCandidate !== '') {
+                if ($this->isPublicStoragePath($pathCandidate)) {
+                    $optimized = $this->optimizeAndReplacePublicImage($pathCandidate, directory: 'reviews/avatars', maxBytes: 1024 * 1024);
+                    $avatarPath = $optimized ?? $pathCandidate;
+
+                    if ($this->isPublicStoragePath($avatarPath)) {
+                        $newAvatars[] = $avatarPath;
+                    }
+                    $avatarUrl = null;
+                } elseif (Str::startsWith($pathCandidate, ['http://', 'https://', '/'])) {
+                    $avatarUrl = $this->sanitizeNullableUrl($pathCandidate);
+                    $avatarPath = null;
+                }
+            }
+
+            $normalized[] = [
+                'name' => $name,
+                'text' => $text,
+                'course' => $course !== '' ? $course : null,
+                'stars' => $stars,
+                'avatar_path' => $avatarPath,
+                'avatar_url' => $avatarUrl,
+            ];
+        }
+
+        if ($normalized === []) {
+            $normalized = $defaults;
+            $newAvatars = [];
+        }
+
+        $this->cleanupReviewAvatars($newAvatars);
+
+        return $normalized;
+    }
+
     protected function extractYoutubeId(mixed $value): string
     {
         $str = trim((string) ($value ?? ''));
@@ -796,6 +1402,18 @@ class HomepageSettingsPage extends SettingsPage
 
         $this->oldAdvantageImages = $newImages;
         $this->oldAdvantageIcons = $newIcons;
+    }
+
+    protected function cleanupReviewAvatars(array $newAvatars): void
+    {
+        $disk = Storage::disk('public');
+
+        $toDelete = array_filter($this->oldReviewAvatars, fn ($path) => $this->isPublicStoragePath($path) && ! in_array($path, $newAvatars, true));
+        if ($toDelete) {
+            $disk->delete($toDelete);
+        }
+
+        $this->oldReviewAvatars = $newAvatars;
     }
 
     protected function isPublicStoragePath(string $path): bool

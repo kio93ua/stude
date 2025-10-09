@@ -11,16 +11,19 @@
     <div class="mt-10 grid gap-8 md:grid-cols-2">
       @forelse ($posts as $post)
         <article class="flex h-full flex-col overflow-hidden rounded-2xl border border-brand-mint/40 bg-white/90 shadow-sm">
-          @if ($post->cover_image_path)
-            <a href="{{ route('posts.show', $post) }}" class="block overflow-hidden">
-              <img
-                src="{{ asset('storage/' . ltrim($post->cover_image_path, '/')) }}"
-                alt="{{ $post->title }}"
-                class="h-52 w-full object-cover transition duration-300 hover:scale-[1.02]"
-                loading="lazy"
-              >
-            </a>
-          @endif
+         @if ($post->cover_image_path)
+  <a href="{{ route('posts.show', $post) }}" class="block overflow-hidden rounded-t-2xl bg-[#f6fbf9]">
+    <div class="aspect-[16/9] w-full">  {{-- контейнер зі співвідношенням 16:9 --}}
+      <img
+        src="{{ asset('storage/' . ltrim($post->cover_image_path, '/')) }}"
+        alt="{{ $post->title }}"
+        class="h-full w-full object-contain"  {{-- вписати без обрізань --}}
+        loading="lazy"
+        width="1280" height="720"            {{-- резервує місце, менше CLS --}}
+      >
+    </div>
+  </a>
+@endif
 
           <div class="flex flex-1 flex-col p-6">
             <div class="flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-secondary/60">

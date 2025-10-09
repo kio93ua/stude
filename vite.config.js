@@ -12,12 +12,12 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    // важливо: без alias на 'vue/dist/*', щоб не було дубля Vue
+    
     dedupe: ['vue'],
     alias: { '@': path.resolve(__dirname, 'resources/js') },
   },
   build: {
-    // простий, передбачуваний білд; сорсмапи в проді не потрібні
+    
     sourcemap: false,
     rollupOptions: {
       output: {

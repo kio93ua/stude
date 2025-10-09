@@ -10,6 +10,7 @@
   <style>[x-cloak]{display:none!important}</style>
   <link rel="preload" as="image" href="{{ asset('images/logo.png') }}" imagesizes="(min-width:1024px) 200px, 140px">
   @vite(['resources/css/app.css','resources/js/app.js'])
+    @stack('styles')
 </head>
 <body class="min-h-screen font-sans text-secondary bg-gradient-to-b from-brand-mint/50 via-white to-brand-mint/20">
 
